@@ -1,0 +1,30 @@
+/*
+ *      DEF_TEST("description[50]", fnc_pointer, enum_type)
+ */
+
+DEF_TEST("matmul2d (jk) not vectorized",
+         matmul2d_jk_novec,
+         matmul2d_jk_novec_type)
+DEF_TEST("matmul2d (kj) not vectorized",
+         matmul2d_kj_novec,
+         matmul2d_kj_novec_type)
+
+DEF_TEST("matmul2d (kj) k loop is vectorized",
+         matmul2d_kj_vec_k,
+         matmul2d_kj_vec_k_type)
+DEF_TEST("matmul2d (kj) j loop is vectorized",
+         matmul2d_kj_vec_j,
+         matmul2d_kj_vec_j_type)
+DEF_TEST("matmul2d (kj) k and j loops are vectorized",
+         matmul2d_kj_vec_kj,
+         matmul2d_kj_vec_kj_type)
+
+DEF_TEST("matmul2d (jk) k loop is vectorized",
+         matmul2d_jk_vec_k,
+         matmul2d_jk_vec_k_type)
+DEF_TEST("matmul2d (jk) j loop is vectorized",
+         matmul2d_jk_vec_j,
+         matmul2d_jk_vec_j_type)
+DEF_TEST("matmul2d (jk) j and k loops are vectorized",
+         matmul2d_jk_vec_jk,
+         matmul2d_jk_vec_jk_type)
