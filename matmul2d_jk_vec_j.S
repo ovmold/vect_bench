@@ -21,19 +21,19 @@ matmul2d_jk_vec_j:
 	leaq	MTRX_SIZE(%rdx), %r10
 	leaq	MTRX_SIZE+STR_SIZE(%rdx), %rdi
 	movq	%rsi, %r8
-.L2:
+.L2: /* i */
 	movq	%r10, %rcx
 	movq	%r9, %rsi
 	.p2align 4,,10
 	.p2align 3
-.L6:
+.L6: /* j */
     vmovupd (%rsi), %xmm1
     vinsertf128 $0x1, 16(%rsi), %ymm1, %ymm1
 	leaq	-MTRX_SIZE(%rcx), %rax
 	movq	%r8, %rdx
 	.p2align 4,,10
 	.p2align 3
-.L3:
+.L3: /* k */
     vbroadcastsd (%rdx), %ymm0
 	addq	$STR_SIZE, %rax
 	addq	$8, %rdx
