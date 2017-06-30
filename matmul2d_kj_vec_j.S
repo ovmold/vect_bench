@@ -5,7 +5,11 @@
 	.globl	matmul2d_kj_vec_j
 	.type	matmul2d_kj_vec_j, @function
 matmul2d_kj_vec_j:
-	movq	%rdi, %rcx
+    movq %rdx, %r10
+    get_tsc tsc_val_b
+    movq %r10, %rdx
+
+    movq	%rdi, %rcx
 	leaq	MTRX_SIZE(%rdi), %r8
 	movq	%rdx, %r9
 	movq	%rsi, %r10
@@ -42,4 +46,7 @@ matmul2d_kj_vec_j:
 	cmpq	%r8, %rcx
 	jne	.L2
 	vzeroupper
-	ret
+
+    get_tsc tsc_val_e
+        
+    ret

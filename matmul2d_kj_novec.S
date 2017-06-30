@@ -12,6 +12,10 @@
 	.globl	matmul2d_kj_novec
 	.type	matmul2d_kj_novec, @function
 matmul2d_kj_novec:
+    movq %rdx, %r10
+    get_tsc tsc_val_b
+    movq %r10, %rdx
+    
 	subq	%rsi, %rdi
 	leaq	STR_SIZE(%rsi), %r8
 	leaq	MTRX_SIZE+STR_SIZE(%rsi), %r10
@@ -41,4 +45,7 @@ matmul2d_kj_novec:
 	addq	$STR_SIZE, %r8
 	cmpq	%r8, %r10
 	jne	.L2
+
+    get_tsc tsc_val_e
+        
 	rep ret

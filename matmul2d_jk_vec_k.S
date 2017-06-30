@@ -5,18 +5,23 @@ indcs:
     .int 1, 2, 3, 4
     .p2align 16
 mask:
-    .int 1, 1, 1, 1
+    .int 1, 0, 1, 0, 1, 0, 1, 0
     
 	.text
 	.p2align 4,,15
 	.globl	matmul2d_jk_vec_k
 	.type	matmul2d_jk_vec_k, @function
 matmul2d_jk_vec_k:
-	movq	%rdi, %r9
+	movq    %rdi, %r9
 	leaq	MTRX_SIZE(%rsi), %r11
 	leaq	MTRX_SIZE(%rdx), %r10
 	leaq	MTRX_SIZE+STR_SIZE(%rdx), %rdi
 	movq	%rsi, %r8
+
+/*    mov STR_SIZE*0, %xmm4
+    mov STR_SIZE*1, %ecx
+    mov STR_SIZE*2, %ecx
+    mov STR_SIZE*3, %ecx*/
 .L2:
 	movq	%r10, %rcx
 	movq	%r9, %rsi
@@ -26,7 +31,7 @@ matmul2d_jk_vec_k:
 	movq $0, %rcx
 	vmovdqu (indcs), %xmm2
     /*set ymm3 to all ones, since it acts as the mask in vgatherdpd*/
-	vmovdqu (mask), %ymm3
+	vpcmpeqw %ymm3, %ymm3, %ymm3
 
 	vgatherdpd %ymm3,(%rdx,%xmm2,8),%ymm1
     

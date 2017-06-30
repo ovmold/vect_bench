@@ -66,6 +66,9 @@ static DATA_TYPE B[N][N];
 static DATA_TYPE C[N][N];
 static DATA_TYPE A[N][N];
 
+long unsigned int tsc_val_b;
+long unsigned int tsc_val_e;
+
 void matmul2d(DATA_TYPE A[][N],
               DATA_TYPE B[][N],
               DATA_TYPE C[][N])
@@ -123,11 +126,14 @@ void test_run(int id)
         fprintf(stderr, "%d is unknown test\n", id);
         return ;
     }
+
+    tsc_val_b = tsc_val_e = 0;
     printf("Test <%s> will run\n", matmul2d_descs[id].desc);
     double t = omp_get_wtime();
     matmul2d_descs[id].tst_entry(A, B, C);
     t = omp_get_wtime() - t;
-    printf("Execution time of matmul2d: %lf\n", t);
+    printf("Execution time of matmul2d: %lf [%lu]\n",
+           t, tsc_val_e - tsc_val_b);
 }
 
 int check_results()
