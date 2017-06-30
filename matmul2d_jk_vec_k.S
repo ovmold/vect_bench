@@ -1,8 +1,8 @@
 #include "matmul.h"
     .data
 	.p2align 16
-indcs:
-    .int 1, 2, 3, 4
+vindices:
+    .int 0*STR_SIZE, 1*STR_SIZE, 2*STR_SIZE, 3*STR_SIZE
     .p2align 16
 mask:
     .int 1, 0, 1, 0, 1, 0, 1, 0
@@ -12,44 +12,45 @@ mask:
 	.globl	matmul2d_jk_vec_k
 	.type	matmul2d_jk_vec_k, @function
 matmul2d_jk_vec_k:
-	movq    %rdi, %r9
+        movq %rdx, %r10
+    get_tsc tsc_val_b
+    movq %r10, %rdx
+
+    vpcmpeqw %ymm3, %ymm3, %ymm3
+	vmovdqu (indcs), %xmm2
+    /*    mov STR_SIZE*0, %xmm4
+    mov STR_SIZE*1, %ecx
+    mov STR_SIZE*2, %ecx
+    mov STR_SIZE*3, %ecx*/
+        
+    movq	%rdi, %r9
 	leaq	MTRX_SIZE(%rsi), %r11
 	leaq	MTRX_SIZE(%rdx), %r10
 	leaq	MTRX_SIZE+STR_SIZE(%rdx), %rdi
 	movq	%rsi, %r8
-
-/*    mov STR_SIZE*0, %xmm4
-    mov STR_SIZE*1, %ecx
-    mov STR_SIZE*2, %ecx
-    mov STR_SIZE*3, %ecx*/
-.L2:
+.L2: /* i loop */
 	movq	%r10, %rcx
 	movq	%r9, %rsi
 	.p2align 4,,10
 	.p2align 3
-.L6:
-	movq $0, %rcx
-	vmovdqu (indcs), %xmm2
-    /*set ymm3 to all ones, since it acts as the mask in vgatherdpd*/
-	vpcmpeqw %ymm3, %ymm3, %ymm3
-
-	vgatherdpd %ymm3,(%rdx,%xmm2,8),%ymm1
-    
-	movsd	(%rsi), %xmm1
+.L6: /* j loop */
+    vbroadcastsd (%rsi), %ymm1                  /* load A[i][j,j,j,j] */
 	leaq	-MTRX_SIZE(%rcx), %rax
 	movq	%r8, %rdx
 	.p2align 4,,10
 	.p2align 3
-.L3:
-	movsd	(%rdx), %xmm0
-	addq	$STR_SIZE, %rax
-	addq	$8, %rdx
-	mulsd	-STR_SIZE(%rax), %xmm0
+.L3: /* k loop */
+    vmovupd (%rdx), %xmm0                       /* load B[i][k + 0:k + 1] */
+    vinsertf128 $0x1, 16(%rdx), %ymm0, %ymm0    /* load B[i][k + 2:k + 4] */
+    vgatherdpd %ymm3, (%rax, %xmm2), %ymm4      /* load C[k + 0:k + 4][j] */
+	addq	$STR_SIZE*4, %rax                   /* k+=4 or C = C += STR_SIZE*4 (offset by column) */
+	addq	$8*4, %rdx                          /* k+=4 or B += B + 8*4 (offset by row)*/
+    vmulpd %ymm4, %ymm0, %ymm0
 	cmpq	%rax, %rcx
-	addsd	%xmm0, %xmm1
-	movsd	%xmm1, (%rsi)
+    vaddpd %ymm0, %ymm1, %ymm1
 	jne	.L3
-	addq	$8, %rcx
+	movsd	%xmm1, (%rsi)
+    addq	$8, %rcx
 	addq	$8, %rsi
 	cmpq	%rdi, %rcx
 	jne	.L6
@@ -57,4 +58,7 @@ matmul2d_jk_vec_k:
 	addq	$STR_SIZE, %r9
 	cmpq	%r11, %r8
 	jne	.L2
+
+    get_tsc tsc_val_e
+    
 	rep ret
