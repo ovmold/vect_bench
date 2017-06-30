@@ -1,5 +1,11 @@
 #include "matmul.h"
 
+/*
+    matmul2d_kj_vec_j(A,B,C)
+    A -> rdi
+    B -> rsi
+    C -> rdx
+*/
 	.text
 	.p2align 4,,15
 	.globl	matmul2d_kj_vec_j
@@ -14,36 +20,36 @@ matmul2d_kj_vec_j:
 	movq	%rdx, %r9
 	movq	%rsi, %r10
 	addq	$MTRX_SIZE, %rdx
-.L2:
+.L2: /* i loop */
 	movq	%r9, %rsi
 	movq	%r10, %rdi
 	.p2align 4,,10
 	.p2align 3
-.L10:
-	vbroadcastsd	(%rdi), %ymm2
+.L10: /* k loop */
+	vbroadcastsd	(%rdi), %ymm2                 /* B[i][k] */
 	xorl	%eax, %eax
 	.p2align 4,,10
 	.p2align 3
-.L5:
-	vmovupd	(%rsi,%rax), %xmm0
-	vinsertf128	$0x1, 16(%rsi,%rax), %ymm0, %ymm0
-	vmovupd	(%rcx,%rax), %xmm1
-	vinsertf128	$0x1, 16(%rcx,%rax), %ymm1, %ymm1
-	vmulpd	%ymm2, %ymm0, %ymm0
-	vaddpd	%ymm1, %ymm0, %ymm0
-	vmovups	%xmm0, (%rcx,%rax)
-	vextractf128	$0x1, %ymm0, 16(%rcx,%rax)
-	addq	$32, %rax
-	cmpq	$STR_SIZE, %rax
+.L5: /* j loop */
+	vmovupd	(%rsi,%rax), %xmm0                    /* C[k][j + 0:1] */
+	vinsertf128	$0x1, 16(%rsi,%rax), %ymm0, %ymm0 /* C[k][j + 2:3] */
+	vmovupd	(%rcx,%rax), %xmm1                    /* A[i][j + 0:1] */
+	vinsertf128	$0x1, 16(%rcx,%rax), %ymm1, %ymm1 /* A[i][j + 2:3] */
+	vmulpd	%ymm2, %ymm0, %ymm0                   /* C[k][j + 0:3] * B[i][k] */
+	vaddpd	%ymm1, %ymm0, %ymm0                   /* A[i][j + 0:3] + C[k][j + 0:3] * B[i][k] */
+	vmovups	%xmm0, (%rcx,%rax)                    /* A[i][j + 0:1] = A[i][j + 0:1] + C[k][j + 0:1] * B[i][k] */
+	vextractf128	$0x1, %ymm0, 16(%rcx,%rax)    /* A[i][j + 2:3] = A[i][j + 2:3] + C[k][j + 2:3] * B[i][k] */
+	addq	$32, %rax                             /* j = j + 4 */
+	cmpq	$STR_SIZE, %rax                       /* j == STR_SIZE ? j loop is over */
 	jne	.L5
-	addq	$STR_SIZE, %rsi
-	addq	$8, %rdi
-	cmpq	%rdx, %rsi
+	addq	$STR_SIZE, %rsi                       /* C[k + 1][j] */  
+	addq	$8, %rdi                              /* B[i][k + 1] */
+	cmpq	%rdx, %rsi                            /* C[k + 1][j] == C[N - 1][j] ? k loop is over */
 	jne	.L10
 .L6:
-	addq	$STR_SIZE, %rcx
-	addq	$STR_SIZE, %r10
-	cmpq	%r8, %rcx
+	addq	$STR_SIZE, %rcx                       /* A[i + 1][j] */
+	addq	$STR_SIZE, %r10                       /* B[i + 1][k] */
+	cmpq	%r8, %rcx                             /* A[i + 1][j] == A[N - 1][j] ? i loop is over */
 	jne	.L2
 	vzeroupper
 
