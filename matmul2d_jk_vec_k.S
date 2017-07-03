@@ -3,21 +3,17 @@
 	.p2align 16
 vindices:
     .int 0*STR_SIZE, 1*STR_SIZE, 2*STR_SIZE, 3*STR_SIZE
-    .p2align 16
-mask:
-    .int 1, 0, 1, 0, 1, 0, 1, 0
     
 	.text
 	.p2align 4,,15
 	.globl	matmul2d_jk_vec_k
 	.type	matmul2d_jk_vec_k, @function
 matmul2d_jk_vec_k:
-        movq %rdx, %r10
+    movq %rdx, %r10
     get_tsc tsc_val_b
     movq %r10, %rdx
 
-    vpcmpeqw %ymm3, %ymm3, %ymm3
-	vmovdqu (indcs), %xmm2
+	vmovdqu (vindices), %xmm2
     /*    mov STR_SIZE*0, %xmm4
     mov STR_SIZE*1, %ecx
     mov STR_SIZE*2, %ecx
@@ -34,7 +30,8 @@ matmul2d_jk_vec_k:
 	.p2align 4,,10
 	.p2align 3
 .L6: /* j loop */
-    vbroadcastsd (%rsi), %ymm1                  /* load A[i][j,j,j,j] */
+    vxorpd %ymm1, %ymm1, %ymm1
+    movsd (%rsi), %xmm1                  /* load A[i][j] */
 	leaq	-MTRX_SIZE(%rcx), %rax
 	movq	%r8, %rdx
 	.p2align 4,,10
@@ -42,6 +39,7 @@ matmul2d_jk_vec_k:
 .L3: /* k loop */
     vmovupd (%rdx), %xmm0                       /* load B[i][k + 0:k + 1] */
     vinsertf128 $0x1, 16(%rdx), %ymm0, %ymm0    /* load B[i][k + 2:k + 4] */
+    vpcmpeqw %ymm3, %ymm3, %ymm3                /* set mask (ymm1) to 1 1 1 1 */
     vgatherdpd %ymm3, (%rax, %xmm2), %ymm4      /* load C[k + 0:k + 4][j] */
 	addq	$STR_SIZE*4, %rax                   /* k+=4 or C = C += STR_SIZE*4 (offset by column) */
 	addq	$8*4, %rdx                          /* k+=4 or B += B + 8*4 (offset by row)*/
@@ -49,7 +47,10 @@ matmul2d_jk_vec_k:
 	cmpq	%rax, %rcx
     vaddpd %ymm0, %ymm1, %ymm1
 	jne	.L3
-	movsd	%xmm1, (%rsi)
+    vhaddpd %ymm1, %ymm1, %ymm1
+    vperm2f128 $0x1, %ymm1, %ymm1, %ymm0
+    vaddpd %ymm0, %ymm1, %ymm1
+    movsd	%xmm1, (%rsi)
     addq	$8, %rcx
 	addq	$8, %rsi
 	cmpq	%rdi, %rcx
