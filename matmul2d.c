@@ -144,6 +144,8 @@ int check_results()
         for (int j = 0; j < N; j++) {
             if (A[i][j] != correct_instance[i][j]) {
                 fprintf(stderr, "A[%d][%d] is not correct\n", i, j);
+                fprintf(stderr, "A[%d][%d] (%.20lf) != (%.20lf)\n",
+                        i, j, A[i][j], correct_instance[i][j]);
                 return 1;
             }
         }
