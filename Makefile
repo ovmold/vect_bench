@@ -4,7 +4,7 @@ matmul2d_jk_novec.o matmul2d_kj_novec.o \
 matmul2d_kj_vec_k.o matmul2d_kj_vec_j.o matmul2d_kj_vec_kj.o \
 matmul2d_jk_vec_k.o matmul2d_jk_vec_j.o matmul2d_jk_vec_jk.o
 
-CFLAGS = -Wall -g -O2 -fopenmp -D N=2048
+CFLAGS = -Wall -g -O2 -fopenmp -D N=2048 -D EPS=10E-15
 ASFLAGS = -m64 -D N=2048
 
 all: $(OBJS_matmul)

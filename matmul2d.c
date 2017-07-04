@@ -1,12 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include <math.h>
 #include <omp.h>
 
 #include "matmul.h"
 
 #ifndef N
 #error "N is not defined."
+#endif
+
+#ifndef EPS
+#error "Tolerance EPS is no defined."
 #endif
 
 #define DATA_TYPE double
@@ -83,7 +88,13 @@ void matmul2d(DATA_TYPE A[][N],
         }
     }
 }
+static int is_double_equal(double a, double b) 
+{
+    if (fabs(a - b) > EPS)
+        return 0;
 
+    return 1;
+}
 void init_data()
 {
     FILE *fgg=NULL;
@@ -142,7 +153,7 @@ int check_results()
 
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            if (A[i][j] != correct_instance[i][j]) {
+            if (!is_double_equal(A[i][j], correct_instance[i][j])) {
                 fprintf(stderr, "A[%d][%d] is not correct\n", i, j);
                 fprintf(stderr, "A[%d][%d] (%.20lf) != (%.20lf)\n",
                         i, j, A[i][j], correct_instance[i][j]);

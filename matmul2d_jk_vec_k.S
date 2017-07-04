@@ -30,8 +30,8 @@ matmul2d_jk_vec_k:
 	.p2align 4,,10
 	.p2align 3
 .L6: /* j loop */
-    vxorpd %ymm1, %ymm1, %ymm1
-    movsd (%rsi), %xmm1                  /* load A[i][j] */
+//    vxorpd %ymm1, %ymm1, %ymm1
+    vmovsd (%rsi), %xmm1                   /* load A[i][j] */
 	leaq	-MTRX_SIZE(%rcx), %rax
 	movq	%r8, %rdx
 	.p2align 4,,10
@@ -50,7 +50,7 @@ matmul2d_jk_vec_k:
     vhaddpd %ymm1, %ymm1, %ymm1
     vperm2f128 $0x1, %ymm1, %ymm1, %ymm0
     vaddpd %ymm0, %ymm1, %ymm1
-    movsd	%xmm1, (%rsi)
+    vmovsd	%xmm1, (%rsi)
     addq	$8, %rcx
 	addq	$8, %rsi
 	cmpq	%rdi, %rcx
