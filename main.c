@@ -3,15 +3,25 @@
 #include "matmul.h"
 
 int main(int argc, char* argv[])
-{
-
-    
+{   
     init_data();
     test_run(matmul2d_kj_vec_j_type);
     check_results();
     
     init_data();
     test_run(matmul2d_kj_vec_k_type);
+    check_results();
+
+    init_data();
+    test_run(matmul2d_kj_vec_k_no_gather_type);
+    check_results();
+
+    init_data();
+    test_run(matmul2d_kj_vec_kj_1_type);
+    check_results();
+
+    init_data();
+    test_run(matmul2d_kj_vec_kj_2_type);
     check_results();
 
     init_data();

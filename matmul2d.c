@@ -30,13 +30,21 @@ void matmul2d_kj_vec_k(DATA_TYPE [][N],
                        DATA_TYPE [][N],
                        DATA_TYPE [][N]);
 
+void matmul2d_kj_vec_k_no_gather(DATA_TYPE [][N],
+                                 DATA_TYPE [][N],
+                                 DATA_TYPE [][N]);
+
 void matmul2d_kj_vec_j(DATA_TYPE [][N],
                        DATA_TYPE [][N],
                        DATA_TYPE [][N]);
 
-void matmul2d_kj_vec_kj(DATA_TYPE [][N],
-                        DATA_TYPE [][N],
-                        DATA_TYPE [][N]);
+void matmul2d_kj_vec_kj_1(DATA_TYPE [][N],
+                          DATA_TYPE [][N],
+                          DATA_TYPE [][N]);
+
+void matmul2d_kj_vec_kj_2(DATA_TYPE [][N],
+                          DATA_TYPE [][N],
+                          DATA_TYPE [][N]);
 
 void matmul2d_jk_vec_k(DATA_TYPE [][N],
                        DATA_TYPE [][N],
