@@ -8,7 +8,7 @@
 */
 
 vindices: /* Array of indices to access C[k + 0:3][j] */                                        
-    .int 0*STR_SIZE, 1*STR_SIZE, 2*STR_SIZE, 3*STR_SIZE  
+    .int 0*STR_SIZE, 1*STR_SIZE, 2*STR_SIZE, 3*STR_SIZE
 
 	.text
 	.globl	matmul2d_kj_vec_kj_1
@@ -29,68 +29,32 @@ matmul2d_kj_vec_kj_1:
 	leaq	-STR_SIZE(%r10), %rsi					/* B[i - 1][k] */
 
 .L10: /* k loop */
-    vmovupd	(%rsi), %xmm2                           /* B[i][k + 0:1] */
-	vinsertf128	$0x1, 16(%rsi), %ymm2, %ymm2        /* B[i][k + 2:3] */	
-	xorl %eax, %eax									/* j = 0 */
+    vmovupd	(%rsi), %ymm2                           /* B[i][k + 0:3] */
+	xorl	%eax, %eax								/* j = 0 */
 
 .L5: /* j loop */
-	movq %rax, %rbx									/* j */
-	vpcmpeqw %ymm3, %ymm3, %ymm3 				    /* set ymm3 to all ones, it acts as the mask in vgatherdpd */
-	leaq (%rdi,%rbx), %r11
-	vgatherdpd %ymm3, (%r11,%xmm4), %ymm0     	    /* C[k + 0:3][j + 0] */
+	xorl	%ebx, %ebx								/* counter = 0 */
 
-	vmulpd	%ymm2, %ymm0, %ymm0                   	/* B[i][k + 0:3] * C[k + 0:3][j + 0] */
+.L7:
+	vpcmpeqw	%ymm3, %ymm3, %ymm3 				/* set ymm3 to all ones, it acts as the mask in vgatherdpd */
+	leaq	(%rdi,%rax), %r11
+	vgatherdpd	%ymm3, (%r11,%xmm4), %ymm0     	    /* C[k + 0:3][j + counter] */
 
-	/* Reduce for product */															
-	vhaddpd %ymm0, %ymm0, %ymm0                     /* Horizontal sum of product */
-	vperm2f128 $0x1, %ymm0, %ymm0, %ymm1
-	vaddpd %ymm0, %ymm1, %ymm0
-	vaddsd (%rcx,%rbx), %xmm0, %xmm0
-	vmovsd %xmm0, (%rcx,%rbx)						/* A[i][j + 0] */
-
-	addq $8, %rbx									/* j = j + 1 */	
-	vpcmpeqw %ymm3, %ymm3, %ymm3 				    /* set ymm3 to all ones, it acts as the mask in vgatherdpd */
-	leaq (%rdi,%rbx), %r11
-	vgatherdpd %ymm3, (%r11,%xmm4), %ymm0     	    /* C[k + 0:3][j + 1] */
-
-	vmulpd	%ymm2, %ymm0, %ymm0                   	/* B[i][k + 0:3] * C[k + 0:3][j + 1] */
+	vmulpd	%ymm2, %ymm0, %ymm0                   	/* B[i][k + 0:3] * C[k + 0:3][j + counter] */
 
 	/* Reduce for product */															
-	vhaddpd %ymm0, %ymm0, %ymm0                     /* Horizontal sum of product */
-	vperm2f128 $0x1, %ymm0, %ymm0, %ymm1
-	vaddpd %ymm0, %ymm1, %ymm0
-	vaddsd (%rcx,%rbx), %xmm0, %xmm0
-	vmovsd %xmm0, (%rcx,%rbx)						/* A[i][j + 1] */
+	vhaddpd	%ymm0, %ymm0, %ymm0                     /* Horizontal sum of product */
+	vperm2f128	$0x1, %ymm0, %ymm0, %ymm1
+	vaddpd	%ymm0, %ymm1, %ymm0
+	vaddsd	(%rcx,%rax), %xmm0, %xmm0
+	vmovsd	%xmm0, (%rcx,%rax)						/* A[i][j + counter] */
+	
+	addq	$1, %rbx								/* counter = counter + 1 */	
+	addq	$8, %rax
+	cmpq	$4, %rbx
+	jne .L7
 
-	addq $8, %rbx									/* j = j + 1 */
-	vpcmpeqw %ymm3, %ymm3, %ymm3 				    /* set ymm3 to all ones, it acts as the mask in vgatherdpd */
-	leaq (%rdi,%rbx), %r11
-	vgatherdpd %ymm3, (%r11,%xmm4), %ymm0     	    /* C[k + 0:3][j + 2] */
-
-	vmulpd	%ymm2, %ymm0, %ymm0                   	/* B[i][k + 0:3] * C[k + 0:3][j + 2] */
-
-	/* Reduce for product */															
-	vhaddpd %ymm0, %ymm0, %ymm0                     /* Horizontal sum of product */
-	vperm2f128 $0x1, %ymm0, %ymm0, %ymm1
-	vaddpd %ymm0, %ymm1, %ymm0
-	vaddsd (%rcx,%rbx), %xmm0, %xmm0
-	vmovsd %xmm0, (%rcx,%rbx)						/* A[i][j + 2] */
-
-	addq $8, %rbx									/* j = j + 1 */
-	vpcmpeqw %ymm3, %ymm3, %ymm3 				    /* set ymm3 to all ones, it acts as the mask in vgatherdpd */
-	leaq (%rdi,%rbx), %r11
-	vgatherdpd %ymm3, (%r11,%xmm4), %ymm7     	    /* C[k + 0:3][j + 3] */
-
-	vmulpd	%ymm2, %ymm0, %ymm0                   	/* B[i][k + 0:3] * C[k + 0:3][j + 3] */
-
-	/* Reduce for product */															
-	vhaddpd %ymm0, %ymm0, %ymm0                     /* Horizontal sum of product */
-	vperm2f128 $0x1, %ymm0, %ymm0, %ymm1
-	vaddpd %ymm0, %ymm1, %ymm0
-	vaddsd (%rcx,%rbx), %xmm0, %xmm0
-	vmovsd %xmm0, (%rcx,%rbx)						/* A[i][j + 3] */
-
-	addq	$32, %rax                              	/* j = j + 4 */
+	/*addq	$32, %rax                              	 j = j + 4 */
 	cmpq	$STR_SIZE, %rax                       	/* j == STR_SIZE ? j loop is over */
 	jne	.L5
 
