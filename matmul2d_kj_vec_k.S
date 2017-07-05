@@ -28,8 +28,7 @@ matmul2d_kj_vec_k:
 	leaq	-STR_SIZE(%r10), %rsi					/* B[i - 1][k] */
 
 .L10: /* k loop */
-    vmovupd	(%rsi), %xmm2                           /* B[i][k + 0:1] */
-	vinsertf128	$0x1, 16(%rsi), %ymm2, %ymm2        /* B[i][k + 2:3] */	
+    vmovupd	(%rsi), %ymm2                           /* B[i][k + 0:3] */
 	xorl %eax, %eax									/* j = 0 */
 
 .L5: /* j loop */

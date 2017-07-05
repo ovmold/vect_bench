@@ -28,38 +28,28 @@ matmul2d_kj_vec_k_no_gather:
 	leaq	-STR_SIZE(%r10), %rsi					/* B[i - 1][k] */
 
 .L10: /* k loop */
-    vmovupd	(%rsi), %xmm2                           /* B[i][k + 0:1] */
-	vinsertf128	$0x1, 16(%rsi), %ymm2, %ymm2        /* B[i][k + 2:3] */	
-	xorl %eax, %eax									/* j = 0 */
+    vmovupd	(%rsi), %ymm2                           /* B[i][k + 0:1] */
+	xorl	%eax, %eax								/* j = 0 */
 
 .L5: /* j loop */
-    leaq (%rdi), %r11
-    vmovq (%r11,%rax), %xmm0                        /* C[k + 0][j] */
+    vmovq	(%rdi,%rax), %xmm0                      /* C[k + 0][j] */
+    vmovq	STR_SIZE(%rdi,%rax), %xmm1              /* C[k + 1][j] */
+    vmovq	STR_SIZE*2(%rdi,%rax), %xmm3            /* C[k + 2][j] */
+    vmovq	STR_SIZE*3(%rdi,%rax), %xmm4            /* C[k + 3][j] */  
 
-    addq $STR_SIZE, %r11
-    vmovq (%r11,%rax), %xmm1                        /* C[k + 1][j] */
-
-    leaq (%rdi), %r11
-    addq $STR_SIZE*2, %r11
-    vmovq (%r11,%rax), %xmm3                        /* C[k + 2][j] */
-
-    leaq (%rdi), %r11
-    addq $STR_SIZE*3, %r11
-    vmovq (%r11,%rax), %xmm4                        /* C[k + 3][j] */  
-
-    vmovlhps %xmm1, %xmm0, %xmm0
-    vmovlhps %xmm4, %xmm3, %xmm3
+    vmovlhps	%xmm1, %xmm0, %xmm0
+    vmovlhps	%xmm4, %xmm3, %xmm3
 
     vinsertf128	$0x1, %xmm3, %ymm0, %ymm0           /* C[k + 0:3][j] */
 
 	vmulpd	%ymm2, %ymm0, %ymm0                   	/* B[i][k + 0:3] * C[k + 0:3][j] */
 
 	/* Reduce for B[i][k + 0:3] * C[k + 0:3][j] */															
-	vhaddpd %ymm0, %ymm0, %ymm0                     /* Horizontal sum of products */
-	vperm2f128 $0x1, %ymm0, %ymm0, %ymm1
-	vaddpd %ymm0, %ymm1, %ymm0
-	vaddsd (%rcx,%rax), %xmm0, %xmm0
-	vmovsd %xmm0, (%rcx,%rax)
+	vhaddpd	%ymm0, %ymm0, %ymm0                     /* Horizontal sum of products */
+	vperm2f128	$0x1, %ymm0, %ymm0, %ymm1
+	vaddpd	%ymm0, %ymm1, %ymm0
+	vaddsd	(%rcx,%rax), %xmm0, %xmm0
+	vmovsd	%xmm0, (%rcx,%rax)
 
 	addq	$8, %rax                              	/* j = j + 1 */
 	cmpq	$STR_SIZE, %rax                       	/* j == STR_SIZE ? j loop is over */
