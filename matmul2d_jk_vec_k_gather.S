@@ -6,9 +6,9 @@ vindices:
     
 	.text
 	.p2align 4,,15
-	.globl	matmul2d_jk_vec_k
-	.type	matmul2d_jk_vec_k, @function
-matmul2d_jk_vec_k:
+	.globl	matmul2d_jk_vec_k_gather
+	.type	matmul2d_jk_vec_k_gather, @function
+matmul2d_jk_vec_k_gather:
     movq %rdx, %r10
     get_tsc tsc_val_b
     movq %r10, %rdx

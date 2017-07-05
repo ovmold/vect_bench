@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     check_results();
         
     init_data();
-    test_run(matmul2d_jk_vec_k_type);
+    test_run(matmul2d_jk_vec_k_gather_type);
     check_results();
         
     init_data();

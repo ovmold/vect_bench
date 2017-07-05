@@ -26,9 +26,9 @@ DEF_TEST("matmul2d (kj_2) k and j loops are vectorized",
          matmul2d_kj_vec_kj_2,
          matmul2d_kj_vec_kj_2_type)
 
-DEF_TEST("matmul2d (jk) k loop is vectorized",
-         matmul2d_jk_vec_k,
-         matmul2d_jk_vec_k_type)
+DEF_TEST("matmul2d (jk) k loop is vectorized with vgatherdpd",
+         matmul2d_jk_vec_k_gather,
+         matmul2d_jk_vec_k_gather_type)
 DEF_TEST("matmul2d (jk) j loop is vectorized",
          matmul2d_jk_vec_j,
          matmul2d_jk_vec_j_type)
