@@ -16,7 +16,7 @@
 
 #define DATA_TYPE double
 #define Q 16
-#define STR_LEN 50
+#define STR_LEN 100
 
 void matmul2d_jk_novec(DATA_TYPE [][N],
                        DATA_TYPE [][N],
@@ -41,6 +41,10 @@ void matmul2d_kj_vec_j(DATA_TYPE [][N],
 void matmul2d_kj_vec_kj_1(DATA_TYPE [][N],
                           DATA_TYPE [][N],
                           DATA_TYPE [][N]);
+
+void matmul2d_kj_vec_kj_1_no_gather(DATA_TYPE [][N],
+                                    DATA_TYPE [][N],
+                                    DATA_TYPE [][N]);
 
 void matmul2d_kj_vec_kj_2(DATA_TYPE [][N],
                           DATA_TYPE [][N],
