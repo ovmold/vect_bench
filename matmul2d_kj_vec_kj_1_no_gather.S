@@ -1,20 +1,16 @@
 #include "matmul.h"
 
 /*
-    matmul2d_kj_vec_kj_1(A,B,C)
+    matmul2d_kj_vec_kj_1_no_gather(A,B,C)
     A -> rdi
     B -> rsi
     C -> rdx
 */
-
-vindices: /* Array of indices to access C[k + 0:3][j] */                                        
-    .int 0*STR_SIZE, 1*STR_SIZE, 2*STR_SIZE, 3*STR_SIZE
-
 	.text
-	.globl	matmul2d_kj_vec_kj_1
-	.type	matmul2d_kj_vec_kj_1, @function
+	.globl	matmul2d_kj_vec_kj_1_no_gather
+	.type	matmul2d_kj_vec_kj_1_no_gather, @function
 
-matmul2d_kj_vec_kj_1:
+matmul2d_kj_vec_kj_1_no_gather:
 	movq %rdx, %r10
     get_tsc tsc_val_b
     movq %r10, %rdx
@@ -22,7 +18,6 @@ matmul2d_kj_vec_kj_1:
 	movq	%rdi, %rcx     							/* A[0][0] */
 	leaq	MTRX_SIZE(%rdi), %r8                    /* A[N - 1][N - 1] */
 	leaq	STR_SIZE(%rsi), %r10 					/* B[i + 1][0] */
-	vmovdqu (vindices), %xmm4 
 
 .L2: /* i loop */
 	movq	%rdx, %rdi 								/* C[0][0] */
@@ -36,9 +31,15 @@ matmul2d_kj_vec_kj_1:
 	xorl	%ebx, %ebx								/* counter = 0 */
 
 .L7:
-	vpcmpeqw	%ymm3, %ymm3, %ymm3 				/* set ymm3 to all ones, it acts as the mask in vgatherdpd */
-	leaq	(%rdi,%rax), %r11
-	vgatherdpd	%ymm3, (%r11,%xmm4), %ymm0     	    /* C[k + 0:3][j + counter] */
+	vmovq	(%rdi,%rax), %xmm0                      /* C[k + 0][j] */
+    vmovq	STR_SIZE(%rdi,%rax), %xmm1              /* C[k + 1][j] */
+    vmovq	STR_SIZE*2(%rdi,%rax), %xmm3            /* C[k + 2][j] */
+    vmovq	STR_SIZE*3(%rdi,%rax), %xmm4            /* C[k + 3][j] */  
+
+    vmovlhps	%xmm1, %xmm0, %xmm0
+    vmovlhps	%xmm4, %xmm3, %xmm3
+
+    vinsertf128	$0x1, %xmm3, %ymm0, %ymm0           /* C[k + 0:3][j] */
 
 	vmulpd	%ymm2, %ymm0, %ymm0                   	/* B[i][k + 0:3] * C[k + 0:3][j + counter] */
 
@@ -54,7 +55,6 @@ matmul2d_kj_vec_kj_1:
 	cmpq	$4, %rbx
 	jne .L7
 
-	/*addq	$32, %rax                              	 j = j + 4 */
 	cmpq	$STR_SIZE, %rax                       	/* j == STR_SIZE ? j loop is over */
 	jne	.L5
 

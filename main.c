@@ -24,6 +24,10 @@ int main(int argc, char* argv[])
     check_results();
 
     init_data();
+    test_run(matmul2d_kj_vec_kj_1_no_gather_type);
+    check_results();
+
+    init_data();
     test_run(matmul2d_kj_vec_kj_2_type);
     check_results();
 

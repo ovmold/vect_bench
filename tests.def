@@ -15,13 +15,15 @@ DEF_TEST("matmul2d (kj) k loop is vectorized",
 DEF_TEST("matmul2d (kj) k loop is vectorized w/o vgatherdpd",
          matmul2d_kj_vec_k_no_gather,
          matmul2d_kj_vec_k_no_gather_type)
-
 DEF_TEST("matmul2d (kj) j loop is vectorized",
          matmul2d_kj_vec_j,
          matmul2d_kj_vec_j_type)
 DEF_TEST("matmul2d (kj_1) k and j loops are vectorized",
          matmul2d_kj_vec_kj_1,
          matmul2d_kj_vec_kj_1_type)
+DEF_TEST("matmul2d (kj_1) k and j loops are vectorized w/o vgatherdpd",
+         matmul2d_kj_vec_kj_1_no_gather,
+         matmul2d_kj_vec_kj_1_no_gather_type)
 DEF_TEST("matmul2d (kj_2) k and j loops are vectorized",
          matmul2d_kj_vec_kj_2,
          matmul2d_kj_vec_kj_2_type)
