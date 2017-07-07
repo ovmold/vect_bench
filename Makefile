@@ -1,5 +1,5 @@
 BIN_matmul = matmul
-OBJS_matmul = main.o matmul2d.o \
+OBJS_matmul = main.o prepare_system.o matmul2d.o \
 matmul2d_jk_novec.o matmul2d_kj_novec.o \
 matmul2d_kj_vec_k.o matmul2d_kj_vec_k_no_gather.o matmul2d_kj_vec_j.o \
 matmul2d_kj_vec_kj_1.o matmul2d_kj_vec_kj_2.o \

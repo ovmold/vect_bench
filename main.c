@@ -1,9 +1,12 @@
 #include <stdio.h>
 
+#include "prepare_system.h"
 #include "matmul.h"
 
 int main(int argc, char* argv[])
-{   
+{
+    prepare_system();
+
     init_data();
     test_run(matmul2d_kj_vec_j_type);
     check_results();

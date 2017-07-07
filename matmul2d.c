@@ -99,6 +99,7 @@ void matmul2d(DATA_TYPE A[][N],
         }
     }
 }
+
 static int is_double_equal(double a, double b) 
 {
     if (fabs(a - b) > EPS)
@@ -106,6 +107,7 @@ static int is_double_equal(double a, double b)
 
     return 1;
 }
+
 void init_data()
 {
     FILE *fgg=NULL;
