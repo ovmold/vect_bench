@@ -8,9 +8,10 @@ matmul2d_jk_vec_jk.o
 
 CFLAGS = -Wall -g -O2 -fopenmp -D N=2048 -D EPS=10E-15
 ASFLAGS = -m64 -D N=2048
+LDFLAGS = -lnuma
 
 all: $(OBJS_matmul)
-		gcc $(CFLAGS) -o $(BIN_matmul) $^
+		gcc $(CFLAGS) $(LDFLAGS) -o $(BIN_matmul) $^
 
 .c.o:
 		gcc $(CFLAGS) -c -o $@ $<

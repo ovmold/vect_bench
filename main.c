@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-    prepare_system();
+    prepare_system("1", "23", "1");
 
     init_data();
     test_run(matmul2d_kj_vec_j_type);
