@@ -3,6 +3,7 @@
 #define DEF_TEST(name, fnc, type) type,
 enum matmul2d_type {
 #include "tests.def"
+    matmul2d_number_items,
 };
 #undef DEF_TEST
 
@@ -15,7 +16,12 @@ int check_results();
 #ifndef N
 #error "N is not defined."
 #endif
-    
+
+#ifndef HW_CACHELINE_SIZE
+#warn "Undefined HW_CACHELINE_SIZE will be set to 64 byte."
+#define HW_CACHELINE_SIZE 64
+#endif
+
 #define STR_SIZE N*8
 #define MTRX_SIZE N*N*8
 

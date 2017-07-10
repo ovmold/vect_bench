@@ -61,9 +61,9 @@ void matmul2d_jk_vec_j(DATA_TYPE [][N],
                        DATA_TYPE [][N],
                        DATA_TYPE [][N]);
 
-void matmul2d_jk_vec_jk(DATA_TYPE [][N],
-                        DATA_TYPE [][N],
-                        DATA_TYPE [][N]);
+void matmul2d_jk_vec_jk_bcast(DATA_TYPE [][N],
+                              DATA_TYPE [][N],
+                              DATA_TYPE [][N]);
 
 
 typedef void (*test_entry_ptr)(DATA_TYPE [][N],
@@ -150,7 +150,7 @@ void init_data()
 void test_run(int id)
 {
     if ((id < matmul2d_jk_novec_type) ||
-        (id > matmul2d_jk_vec_jk_type)) {
+        (id >= matmul2d_number_items)) {
         fprintf(stderr, "%d is unknown test\n", id);
         return ;
     }
