@@ -1,15 +1,15 @@
 #ifndef __ASSEMBLER__
 
-#define DEF_TEST(name, fnc, type) type,
+#define DEF_TEST(desc, fnc, init, check, type) type,
 enum matmul2d_type {
 #include "tests.def"
     matmul2d_number_items,
 };
 #undef DEF_TEST
 
-void init_data();
+void init_data(int);
 void test_run(int);
-int check_results();
+int check_results(int);
 
 #else /* __ASSEMBLER__ is defined */
 
