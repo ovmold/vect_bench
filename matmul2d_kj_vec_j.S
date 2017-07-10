@@ -31,6 +31,7 @@ matmul2d_kj_vec_j:
 	.p2align 4,,10
 	.p2align 3
 .L5: /* j loop */
+	IACA_START_MARKER
 	vmovupd	(%rsi,%rax), %ymm0 					  /* C[k][j + 0:3] */
 	vmovupd	(%rcx,%rax), %ymm1					  /* A[i][j + 0:3] */
 
@@ -42,6 +43,7 @@ matmul2d_kj_vec_j:
 	addq	$32, %rax                             /* j = j + 4 */
 	cmpq	$STR_SIZE, %rax                       /* j == STR_SIZE ? j loop is over */
 	jne	.L5
+	IACA_END_MARKER
 	addq	$STR_SIZE, %rsi                       /* C[k + 1][j] */  
 	addq	$8, %rdi                              /* B[i][k + 1] */
 	cmpq	%rdx, %rsi                            /* C[k + 1][j] == C[N - 1][j] ? k loop is over */

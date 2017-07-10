@@ -7,7 +7,8 @@ matmul2d_jk_vec_k_gather.o matmul2d_jk_vec_k_no_gather.o matmul2d_jk_vec_j.o \
 matmul2d_jk_vec_jk_bcast.o
 
 CFLAGS = -Wall -g -O2 -fopenmp -D N=2048 -D EPS=10E-15
-ASFLAGS = -m64 -D N=2048 -D HW_CACHELINE_SIZE=64
+#ASFLAGS = -m64 -D N=2048 -D HW_CACHELINE_SIZE=64
+ASFLAGS = -m64 -D N=2048 -D HW_CACHELINE_SIZE=64 -D USE_IACA
 LDFLAGS = -lnuma
 
 all: $(OBJS_matmul)
