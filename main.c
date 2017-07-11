@@ -11,7 +11,6 @@ int main(int argc, char* argv[])
     test_run(matmul2d_kj_vec_j_type);
     check_results(matmul2d_kj_vec_j_type);
 
-    /*    
     init_data(matmul2d_kj_vec_k_type);
     test_run(matmul2d_kj_vec_k_type);
     check_results(matmul2d_kj_vec_k_type);
@@ -47,11 +46,14 @@ int main(int argc, char* argv[])
     init_data(matmul2d_jk_vec_k_gather_type);
     test_run(matmul2d_jk_vec_k_gather_type);
     check_results(matmul2d_jk_vec_k_gather_type);
-    */
-        
+
     init_data(matmul2d_jk_vec_jk_bcast_type);
     test_run(matmul2d_jk_vec_jk_bcast_type);
     check_results(matmul2d_jk_vec_jk_bcast_type);
+
+    init_data(matmul2d_jk_vec_jk_strided_type);
+    test_run(matmul2d_jk_vec_jk_strided_type);
+    check_results(matmul2d_jk_vec_jk_strided_type);
 
     init_data(matmul2d_jk_novec_type);
     test_run(matmul2d_jk_novec_type);

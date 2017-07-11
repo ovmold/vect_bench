@@ -1,4 +1,8 @@
 #include "matmul.h"
+
+/*
+    Matrix C is transposed
+ */
     
 	.text
 	.globl	matmul2d_jk_vec_jk_strided
@@ -10,54 +14,41 @@ matmul2d_jk_vec_jk_strided:
         
     movq	%rdi, %r9
 	leaq	MTRX_SIZE(%rsi), %r11
-	leaq	MTRX_SIZE(%rdx), %r10
+	leaq	STR_SIZE(%rdx), %r10
 	leaq	MTRX_SIZE+STR_SIZE(%rdx), %rdi
 	movq	%rsi, %r8
 .L2: /* i */
 	movq	%r10, %rcx
 	movq	%r9, %rsi
 .L6: /* j */
-    vmovupd (%rsi), %xmm3
-    vinsertf128 $0x1, 16(%rsi), %ymm3, %ymm3
-    vmovupd 32(%rsi), %xmm4
-    vinsertf128 $0x1, 48(%rsi), %ymm4, %ymm4
-	leaq	-MTRX_SIZE(%rcx), %rax
+    vmovsd (%rsi), %xmm0
+//    vmovupd (%rsi), %xmm0
+//    vinsertf128 $0x1, 16(%rsi), %ymm0, %ymm0
+	leaq	-STR_SIZE(%rcx), %rax
 	movq	%r8, %rdx
 .L3: /* k */
-    vbroadcastsd (%rdx), %ymm0
-    vmulpd STR_SIZE*0(%rax), %ymm0, %ymm1
-    vmulpd STR_SIZE*0+32(%rax), %ymm0, %ymm2
-    vaddpd %ymm1, %ymm3, %ymm3
-    vaddpd %ymm2, %ymm4, %ymm4
-    vbroadcastsd 8(%rdx), %ymm0
-    vmulpd STR_SIZE*1(%rax), %ymm0, %ymm1
-    vmulpd STR_SIZE*1+32(%rax), %ymm0, %ymm2
-    vaddpd %ymm1, %ymm3, %ymm3
-    vaddpd %ymm2, %ymm4, %ymm4
-    vbroadcastsd 16(%rdx), %ymm0
-    vmulpd STR_SIZE*2(%rax), %ymm0, %ymm1
-    vmulpd STR_SIZE*2+32(%rax), %ymm0, %ymm2
-    vaddpd %ymm1, %ymm3, %ymm3
-    vaddpd %ymm2, %ymm4, %ymm4
-    vbroadcastsd 24(%rdx), %ymm0
-    vmulpd STR_SIZE*3(%rax), %ymm0, %ymm1
-    vmulpd STR_SIZE*3+32(%rax), %ymm0, %ymm2
-    vaddpd %ymm1, %ymm3, %ymm3
-    vaddpd %ymm2, %ymm4, %ymm4
+    vmovupd (%rdx), %xmm1
+    vinsertf128 $0x1, 16(%rdx), %ymm1, %ymm1
+
+    vmulpd STR_SIZE*0(%rax), %ymm1, %ymm1
+    vaddpd %ymm1, %ymm0, %ymm0
     /* maybe do the vmul after incrementation rax and rdx */
 
-	addq	$STR_SIZE*4, %rax
-	addq	$8*4, %rdx
+	addq	$32, %rax
+	addq	$32, %rdx
 	cmpq	%rax, %rcx
 	jne	.L3
+    vhaddpd %ymm0, %ymm0, %ymm0
+    vperm2f128 $0x1, %ymm0, %ymm0, %ymm1
+    vaddpd %ymm1, %ymm0, %ymm0
+    
+    vmovsd %xmm0, (%rsi)
+/*    vovups %xmm1, (%rsi)
+    vextractf128 $0x1, %ymm1, 16(%rsi)
+*/
 
-    vmovups %xmm3, (%rsi)
-    vextractf128 $0x1, %ymm3, 16(%rsi)
-    vmovups %xmm4, 32(%rsi)
-    vextractf128 $0x1, %ymm4, 48(%rsi)
-
-    addq	$64, %rcx
-	addq	$64, %rsi
+    addq	$STR_SIZE, %rcx
+	addq	$8, %rsi
 	cmpq	%rdi, %rcx
 	jne	.L6
 

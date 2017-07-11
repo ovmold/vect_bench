@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sched.h>
 #include <malloc.h>
 #include <math.h>
 #include <omp.h>
@@ -64,9 +65,14 @@ void matmul2d_jk_vec_j(DATA_TYPE [][N],
 void matmul2d_jk_vec_jk_bcast(DATA_TYPE [][N],
                               DATA_TYPE [][N],
                               DATA_TYPE [][N]);
+void matmul2d_jk_vec_jk_strided(DATA_TYPE [][N],
+                                DATA_TYPE [][N],
+                                DATA_TYPE [][N]);
 
 void default_init(DATA_TYPE []);
+void transpose_C_init(DATA_TYPE QQ[]);
 int default_checker();
+int transpose_C_checker();
 
 typedef void (*test_entry_ptr)(DATA_TYPE [][N],
                                DATA_TYPE [][N],
@@ -107,7 +113,7 @@ int transpose_C_checker()
 {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            for (int k = 0; k < N; ++k) {
+            for (int k = 0; k < N; k++) {
                 correct_instance[i][j] +=  B[i][k] * C[j][k];
             }
         }
@@ -130,7 +136,7 @@ int transpose_C_checker()
 int default_checker()
 {
     for (int i = 0; i < N; i++) {
-        for (int k = 0; k < N; ++k) {
+        for (int k = 0; k < N;  k++) {
             for (int j = 0; j < N; j++) {
                 correct_instance[i][j] +=  B[i][k] * C[k][j];
             }
@@ -161,6 +167,21 @@ void default_init(DATA_TYPE QQ[])
             B[i][j]=QQ[k++]*rand()/RAND_MAX;
             if (k >= Q) k=0;
             C[i][j]=QQ[k++]*rand()/RAND_MAX;
+            if (k >=Q ) k=0;
+        }
+    }
+}
+
+void transpose_C_init(DATA_TYPE QQ[])
+{
+    int k = 0;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            A[i][j] = correct_instance[i][j] = 0;
+            if (k >= Q) k=0;
+            B[i][j]=QQ[k++]*rand()/RAND_MAX;
+            if (k >= Q) k=0;
+            C[j][i]=QQ[k++]*rand()/RAND_MAX;
             if (k >=Q ) k=0;
         }
     }
@@ -204,6 +225,7 @@ void test_run(int id)
 
     tsc_val_b = tsc_val_e = 0;
     printf("Test <%s> will run\n", matmul2d_descs[id].desc);
+    sched_yield();
     double t = omp_get_wtime();
     matmul2d_descs[id].tst_entry(A, B, C);
     t = omp_get_wtime() - t;
