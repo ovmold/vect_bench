@@ -19,9 +19,10 @@ matmul2d_jk_vec_k_no_gather:
     leaq    -MTRX_SIZE(%rcx), %rax
     movq    %r8, %rdx
 .L3: /* k loop */
-    vmovupd (%rdx), %xmm0                       /* load B[i][k + 0:k + 1] */
-    vinsertf128 $0x1, 16(%rdx), %ymm0, %ymm0    /* load B[i][k + 2:k + 4] */
-    vmovq STR_SIZE*0(%rax), %xmm2
+	//IACA_START_MARKER
+    vmovupd (%rdx), %ymm0                       /* load B[i][k + 0:k + 1] */
+    /*vinsertf128 $0x1, 16(%rdx), %ymm0, %ymm0     load B[i][k + 2:k + 4] */
+    vmovq (%rax), %xmm2
     vmovq STR_SIZE*1(%rax), %xmm3
     vmovq STR_SIZE*2(%rax), %xmm4
     vmovq STR_SIZE*3(%rax), %xmm5
