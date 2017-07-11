@@ -68,8 +68,8 @@ DEF_TEST("matmul2d (jk) k and j loops are vectorized (bcast version)",
          default_init,
          default_checker,
          matmul2d_jk_vec_jk_bcast_type)
-DEF_TEST("matmul2d (jk) k and j loops are vectorized (strided version)",
-         matmul2d_jk_vec_jk_strided,
+DEF_TEST("matmul2d (jk) k and j loops are vectorized (strided vmovsd version)",
+         matmul2d_jk_vec_jk_strided_1,
          transpose_C_init,
          transpose_C_checker,
-         matmul2d_jk_vec_jk_strided_type)
+         matmul2d_jk_vec_jk_strided_1_type)

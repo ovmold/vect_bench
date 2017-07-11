@@ -51,9 +51,9 @@ int main(int argc, char* argv[])
     test_run(matmul2d_jk_vec_jk_bcast_type);
     check_results(matmul2d_jk_vec_jk_bcast_type);
 
-    init_data(matmul2d_jk_vec_jk_strided_type);
-    test_run(matmul2d_jk_vec_jk_strided_type);
-    check_results(matmul2d_jk_vec_jk_strided_type);
+    init_data(matmul2d_jk_vec_jk_strided_1_type);
+    test_run(matmul2d_jk_vec_jk_strided_1_type);
+    check_results(matmul2d_jk_vec_jk_strided_1_type);
 
     init_data(matmul2d_jk_novec_type);
     test_run(matmul2d_jk_novec_type);

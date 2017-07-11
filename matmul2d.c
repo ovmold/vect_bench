@@ -65,9 +65,9 @@ void matmul2d_jk_vec_j(DATA_TYPE [][N],
 void matmul2d_jk_vec_jk_bcast(DATA_TYPE [][N],
                               DATA_TYPE [][N],
                               DATA_TYPE [][N]);
-void matmul2d_jk_vec_jk_strided(DATA_TYPE [][N],
-                                DATA_TYPE [][N],
-                                DATA_TYPE [][N]);
+void matmul2d_jk_vec_jk_strided_1(DATA_TYPE [][N],
+                                  DATA_TYPE [][N],
+                                  DATA_TYPE [][N]);
 
 void default_init(DATA_TYPE []);
 void transpose_C_init(DATA_TYPE QQ[]);
