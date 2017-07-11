@@ -28,10 +28,12 @@ matmul2d_kj_vec_k_no_gather:
 	leaq	-STR_SIZE(%r10), %rsi					/* B[i - 1][k] */
 
 .L10: /* k loop */
+	IACA_START_MARKER
     vmovupd	(%rsi), %ymm2                           /* B[i][k + 0:1] */
 	xorl	%eax, %eax								/* j = 0 */
 
 .L5: /* j loop */
+	
     vmovq	(%rdi,%rax), %xmm0                      /* C[k + 0][j] */
     vmovq	STR_SIZE(%rdi,%rax), %xmm1              /* C[k + 1][j] */
     vmovq	STR_SIZE*2(%rdi,%rax), %xmm3            /* C[k + 2][j] */
@@ -54,12 +56,12 @@ matmul2d_kj_vec_k_no_gather:
 	addq	$8, %rax                              	/* j = j + 1 */
 	cmpq	$STR_SIZE, %rax                       	/* j == STR_SIZE ? j loop is over */
 	jne	.L5
-
+	
 	addq 	$32, %rsi							  	/* B[i][k + 4] */
 	addq	$STR_SIZE*4, %rdi                       /* C[k + 4][j] */ 
 	cmpq 	%rsi, %r10                              /* B[i][k + 4] == B[i][N - 1] ? k loop is over */
 	jne	.L10
-
+	IACA_END_MARKER
 .L6:
 	addq	$STR_SIZE, %rcx                       	/* A[i + 1][j] */
 	addq	$STR_SIZE, %r10                       	/* B[i + 1][0] */

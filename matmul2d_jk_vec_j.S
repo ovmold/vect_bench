@@ -26,29 +26,31 @@ matmul2d_jk_vec_j:
 	movq	%r9, %rsi
 	.p2align 4,,10
 	.p2align 3
+
 .L6: /* j */
-    vmovupd (%rsi), %xmm1
-    vinsertf128 $0x1, 16(%rsi), %ymm1, %ymm1
+	/*IACA_START_MARKER*/
+    vmovupd (%rsi), %ymm1
 	leaq	-MTRX_SIZE(%rcx), %rax
 	movq	%r8, %rdx
 	.p2align 4,,10
 	.p2align 3
+
 .L3: /* k */
     vbroadcastsd (%rdx), %ymm0
 	addq	$STR_SIZE, %rax
 	addq	$8, %rdx
-    vmovupd -STR_SIZE(%rax), %xmm2
-    vinsertf128 $0x1, -STR_SIZE+16(%rax), %ymm2, %ymm2
+    vmovupd -STR_SIZE(%rax), %ymm2
     vmulpd %ymm2, %ymm0, %ymm0
 	cmpq	%rax, %rcx
     vaddpd %ymm0, %ymm1, %ymm1
 	jne	.L3
-    vmovups %xmm1, (%rsi)
-    vextractf128 $0x1, %ymm1, 16(%rsi)
+
+    vmovupd %ymm1, (%rsi)
 	addq	$32, %rcx
 	addq	$32, %rsi
 	cmpq	%rdi, %rcx
 	jne	.L6
+	/*IACA_END_MARKER*/
 	addq	$STR_SIZE, %r8
 	addq	$STR_SIZE, %r9
 	cmpq	%r11, %r8
