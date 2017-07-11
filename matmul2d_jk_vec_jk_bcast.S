@@ -15,6 +15,7 @@ matmul2d_jk_vec_jk_bcast:
     movq    %r10, %rcx
     movq    %r9, %rsi
 .L6: /* j */
+// IACA_START_MARKER
     vmovupd (%rsi), %xmm3
     vinsertf128 $0x1, 16(%rsi), %ymm3, %ymm3
     vmovupd 32(%rsi), %xmm4
@@ -49,16 +50,16 @@ matmul2d_jk_vec_jk_bcast:
     cmpq    %rax, %rcx
     jne    .L3
 
-    vmovups %xmm3, (%rsi)
-    vextractf128 $0x1, %ymm3, 16(%rsi)
-    vmovups %xmm4, 32(%rsi)
-    vextractf128 $0x1, %ymm4, 48(%rsi)
+    vmovupd %ymm3, (%rsi)
+    /*vextractf128 $0x1, %ymm3, 16(%rsi)*/
+    vmovupd %ymm4, 32(%rsi)
+    /*vextractf128 $0x1, %ymm4, 48(%rsi)*/
 
     addq    $64, %rcx
     addq    $64, %rsi
     cmpq    %rdi, %rcx
     jne    .L6
-
+/*IACA_END_MARKER*/
     addq    $STR_SIZE, %r8
     addq    $STR_SIZE, %r9
     cmpq    %r11, %r8

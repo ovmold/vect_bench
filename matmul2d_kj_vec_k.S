@@ -25,6 +25,7 @@ matmul2d_kj_vec_k:
     leaq    -STR_SIZE(%r10), %rsi                    /* B[i - 1][k] */
 
 .L10: /* k loop */
+    //IACA_START_MARKER
     vmovupd    (%rsi), %ymm2                           /* B[i][k + 0:3] */
     xorl %eax, %eax                                    /* j = 0 */
 
@@ -50,7 +51,7 @@ matmul2d_kj_vec_k:
     addq    $STR_SIZE*4, %rdi                       /* C[k + 4][j] */ 
     cmpq     %rsi, %r10                              /* B[i][k + 4] == B[i][N - 1] ? k loop is over */
     jne    .L10
-
+    IACA_END_MARKER
 .L6:
     addq    $STR_SIZE, %rcx                           /* A[i + 1][j] */
     addq    $STR_SIZE, %r10                           /* B[i + 1][0] */

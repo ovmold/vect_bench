@@ -23,6 +23,7 @@ matmul2d_kj_vec_kj_2:
     movq    %r10, %rdi
 
 .L10: /* k loop */
+    /*IACA_START_MARKER*/
     vbroadcastsd   (%rdi), %ymm2                   /* B[i][k + 0] */
     vbroadcastsd  8(%rdi), %ymm3                   /* B[i][k + 1] */
     vbroadcastsd 16(%rdi), %ymm4                   /* B[i][k + 2] */
@@ -55,6 +56,7 @@ matmul2d_kj_vec_kj_2:
     cmpq    %rdx, %rsi                             /* C[k + 4][j] == C[N - 1][j] ? k loop is over */
     jne    .L10
 
+    /*IACA_END_MARKER*/
 .L6:
     addq    $STR_SIZE, %rcx                        /* A[i + 1][j] */
     addq    $STR_SIZE, %r10                        /* B[i + 1][k] */
