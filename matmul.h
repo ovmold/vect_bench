@@ -29,11 +29,15 @@ int check_results(int);
 .global tsc_tmp
 
 .macro get_tsc var
+    movq %rbx, %r8
+    movq %rdx, %r10
     xorl %eax, %eax
     cpuid
     rdtsc
     mov %eax, \var
     mov %edx, \var+0x4
+    movq %r10, %rdx
+    movq %r8, %rbx
 .endm
 
 #ifdef USE_IACA
