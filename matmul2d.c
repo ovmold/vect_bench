@@ -15,6 +15,15 @@
 #error "Tolerance EPS is no defined."
 #endif
 
+int check_results(int);
+
+#ifdef RUN_CHECK
+#warning "Check is used."
+#define CHECK(id) check_results(id)
+#else
+#define CHECK(id)
+#endif
+
 #define DATA_TYPE double
 #define Q 16
 #define STR_LEN 100
@@ -230,16 +239,11 @@ void test_run(int id)
     t = omp_get_wtime() - t;
     printf("Execution time of matmul2d: %lf [%lu]\n",
            t, tsc_val_e - tsc_val_b);
+    CHECK(id);
 }
 
 int check_results(int id)
 {
-    if ((id < matmul2d_jk_novec_type) ||
-        (id >= matmul2d_number_items)) {
-        fprintf(stderr, "%d is unknown test\n", id);
-        return 1;
-    }
-
     if (matmul2d_descs[id].checker())
         return 1;
 

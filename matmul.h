@@ -8,7 +8,6 @@ enum matmul2d_type {
 #undef DEF_TEST
 
 void test_run(int);
-int check_results(int);
 
 #else /* __ASSEMBLER__ is defined */
 
