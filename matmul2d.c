@@ -196,12 +196,6 @@ void init_data(int id)
 
     DATA_TYPE QQ[Q];
 
-    if ((id < matmul2d_jk_novec_type) ||
-        (id >= matmul2d_number_items)) {
-        fprintf(stderr, "%d is unknown test\n", id);
-        return ;
-    }
-    
     if ((fgg=fopen("data","rt"))==NULL) {
         fprintf(stderr,"\nError: Can't find data!\n");
         return ;
@@ -225,6 +219,8 @@ void test_run(int id)
         fprintf(stderr, "%d is unknown test\n", id);
         return ;
     }
+
+    init_data(id);
 
     tsc_val_b = tsc_val_e = 0;
     printf("Test <%s> will run\n", matmul2d_descs[id].desc);

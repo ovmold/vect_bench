@@ -7,7 +7,6 @@ enum matmul2d_type {
 };
 #undef DEF_TEST
 
-void init_data(int);
 void test_run(int);
 int check_results(int);
 
