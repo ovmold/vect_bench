@@ -5,6 +5,7 @@
 #include <math.h>
 #include <omp.h>
 
+#include "perf_monitor.h"
 #include "matmul.h"
 
 #ifndef N
@@ -235,7 +236,12 @@ void test_run(int id)
     printf("Test <%s> will run\n", matmul2d_descs[id].desc);
     sched_yield();
     double t = omp_get_wtime();
+
+    PERF_MON_ENABLE();
     matmul2d_descs[id].tst_entry(A, B, C);
+    PERF_MON_DISABLE();
+    PERF_MON_READ();
+
     t = omp_get_wtime() - t;
     printf("Execution time of matmul2d: %lf [%lu]\n",
            t, tsc_val_e - tsc_val_b);
