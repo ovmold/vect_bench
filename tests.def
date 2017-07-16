@@ -9,72 +9,72 @@
 DEF_TEST("matmul2d (jk) not vectorized",
          matmul2d_jk_novec,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_jk_novec_type)
 DEF_TEST("matmul2d (kj) not vectorized",
          matmul2d_kj_novec,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_kj_novec_type)
 
 DEF_TEST("matmul2d (kj) k loop is vectorized",
          matmul2d_kj_vec_k,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_kj_vec_k_type)
 DEF_TEST("matmul2d (kj) k loop is vectorized w/o vgatherdpd",
          matmul2d_kj_vec_k_no_gather,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_kj_vec_k_no_gather_type)
 DEF_TEST("matmul2d (kj) j loop is vectorized",
          matmul2d_kj_vec_j,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_kj_vec_j_type)
 DEF_TEST("matmul2d (kj_1) k and j loops are vectorized",
          matmul2d_kj_vec_kj_1,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_kj_vec_kj_1_type)
 DEF_TEST("matmul2d (kj_1) k and j loops are vectorized w/o vgatherdpd",
          matmul2d_kj_vec_kj_1_no_gather,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_kj_vec_kj_1_no_gather_type)
 DEF_TEST("matmul2d (kj_2) k and j loops are vectorized",
          matmul2d_kj_vec_kj_2,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_kj_vec_kj_2_type)
 
 DEF_TEST("matmul2d (jk) k loop is vectorized with vgatherdpd",
          matmul2d_jk_vec_k_gather,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_jk_vec_k_gather_type)
 DEF_TEST("matmul2d (jk) k loop is vectorized w/o vgatherdpd",
          matmul2d_jk_vec_k_no_gather,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_jk_vec_k_no_gather_type)
 DEF_TEST("matmul2d (jk) j loop is vectorized",
          matmul2d_jk_vec_j,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_jk_vec_j_type)
 DEF_TEST("matmul2d (jk) k and j loops are vectorized (bcast version)",
          matmul2d_jk_vec_jk_bcast,
          default_init,
-         default_checker,
+         default_sampler,
          matmul2d_jk_vec_jk_bcast_type)
 DEF_TEST("matmul2d (jk) k and j loops are vectorized (strided vmovsd version)",
          matmul2d_jk_vec_jk_strided_1,
          transpose_C_init,
-         transpose_C_checker,
+         transpose_C_sampler,
          matmul2d_jk_vec_jk_strided_1_type)
 DEF_TEST("matmul2d (jk) k and j loops are vectorized (strided vmovupd version)",
          matmul2d_jk_vec_jk_strided_2,
          transpose_C_init,
-         transpose_C_checker,
+         transpose_C_sampler,
          matmul2d_jk_vec_jk_strided_2_type)

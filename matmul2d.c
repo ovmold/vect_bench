@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sched.h>
 #include <malloc.h>
 #include <math.h>
 #include <omp.h>
 
+#include "config_json.h"
 #include "perf_monitor.h"
 #include "matmul.h"
 
@@ -84,8 +86,8 @@ void matmul2d_jk_vec_jk_strided_2(DATA_TYPE [][N],
 
 void default_init(DATA_TYPE []);
 void transpose_C_init(DATA_TYPE QQ[]);
-int default_checker();
-int transpose_C_checker();
+int default_sampler();
+int transpose_C_sampler();
 
 typedef void (*test_entry_ptr)(DATA_TYPE [][N],
                                DATA_TYPE [][N],
@@ -97,11 +99,19 @@ typedef struct tests_desc_s {
     char desc[STR_LEN];
     test_entry_ptr tst_entry;
     init_ptr initializer;
-    checker_ptr checker;
+    checker_ptr make_sample;
 } tests_desc_t;
 
 static tests_desc_t matmul2d_descs[] = {
-#define DEF_TEST(desc, fnc, init, check, type) {desc, fnc, init, check},
+#define DEF_TEST(desc, fnc, init, check, type) \
+    {desc, fnc, init, check},
+#include "tests.def"
+#undef DEF_TEST
+};
+
+static const char * const matmul_test_names[matmul2d_number_items] = {
+#define DEF_TEST(desc, fnc, init, check, type) \
+    [type] = #fnc,
 #include "tests.def"
 #undef DEF_TEST
 };
@@ -122,7 +132,7 @@ static int is_double_equal(double a, double b)
     return 1;
 }
 
-int transpose_C_checker()
+int transpose_C_sampler()
 {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
@@ -132,37 +142,15 @@ int transpose_C_checker()
         }
     }
 
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            if (!is_double_equal(A[i][j], correct_instance[i][j])) {
-                fprintf(stderr, "A[%d][%d] is not correct\n", i, j);
-                fprintf(stderr, "A[%d][%d] (%.20lf) != (%.20lf)\n",
-                        i, j, A[i][j], correct_instance[i][j]);
-                return 1;
-            }
-        }
-    }
-
     return 0;
 }
 
-int default_checker()
+int default_sampler()
 {
     for (int i = 0; i < N; i++) {
         for (int k = 0; k < N;  k++) {
             for (int j = 0; j < N; j++) {
                 correct_instance[i][j] +=  B[i][k] * C[k][j];
-            }
-        }
-    }
-
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            if (!is_double_equal(A[i][j], correct_instance[i][j])) {
-                fprintf(stderr, "A[%d][%d] is not correct\n", i, j);
-                fprintf(stderr, "A[%d][%d] (%.20lf) != (%.20lf)\n",
-                        i, j, A[i][j], correct_instance[i][j]);
-                return 1;
             }
         }
     }
@@ -175,7 +163,7 @@ void default_init(DATA_TYPE QQ[])
     int k = 0;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            A[i][j] = correct_instance[i][j] = QQ[k++]*rand()/RAND_MAX;
+            A[i][j] = correct_instance[i][j] = 0;
             if (k >= Q) k=0;
             B[i][j]=QQ[k++]*rand()/RAND_MAX;
             if (k >= Q) k=0;
@@ -230,28 +218,46 @@ void test_run(int id)
         return ;
     }
 
+    long int rep = config_get_repeats();
+    printf("Test [%s] <%s> will run %ld times\n",
+           matmul2d_descs[id].desc,
+           matmul_test_names[id],
+           rep);
+
     init_data(id);
+    matmul2d_descs[id].make_sample();
 
-    tsc_val_b = tsc_val_e = 0;
-    printf("Test <%s> will run\n", matmul2d_descs[id].desc);
-    sched_yield();
-    double t = omp_get_wtime();
+    for (int i = 0; i < rep; i++ ) {
+        tsc_val_b = tsc_val_e = 0;
 
-    PERF_MON_ENABLE();
-    matmul2d_descs[id].tst_entry(A, B, C);
-    PERF_MON_DISABLE();
-    PERF_MON_READ();
+        sched_yield();
+        double t = omp_get_wtime();
 
-    t = omp_get_wtime() - t;
-    printf("Execution time of matmul2d: %lf [%lu]\n",
-           t, tsc_val_e - tsc_val_b);
-    CHECK(id);
+        PERF_MON_ENABLE();
+        matmul2d_descs[id].tst_entry(A, B, C);
+        PERF_MON_DISABLE();
+        PERF_MON_READ();
+
+        t = omp_get_wtime() - t;
+        printf("Execution time of matmul2d: %lf [%lu]\n",
+               t, tsc_val_e - tsc_val_b);
+        CHECK(id);
+        memset(A, 0, sizeof(DATA_TYPE) * N * N);
+    }
 }
 
 int check_results(int id)
 {
-    if (matmul2d_descs[id].checker())
-        return 1;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (!is_double_equal(A[i][j], correct_instance[i][j])) {
+                fprintf(stderr, "A[%d][%d] is not correct\n", i, j);
+                fprintf(stderr, "A[%d][%d] (%.20lf) != (%.20lf)\n",
+                        i, j, A[i][j], correct_instance[i][j]);
+                return 1;
+            }
+        }
+    }
 
     printf("Results are correct\n");
     return 0;
