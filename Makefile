@@ -7,7 +7,7 @@ matmul2d_jk_vec_k_gather.o matmul2d_jk_vec_k_no_gather.o matmul2d_jk_vec_j.o \
 matmul2d_jk_vec_jk_bcast.o matmul2d_jk_vec_jk_strided_1.o \
 matmul2d_jk_vec_jk_strided_2.o
 
-OBJS_utils = prepare_system.o perf_monitor.o config_json.o
+OBJS_utils = prepare_system.o perf_monitor.o config_json.o results_generator.o
 
 matmul_c_params = -D N=2048 -D EPS=10E-10 -D RUN_CHECK \
 -D UARCH=uarch_ivy_bridge

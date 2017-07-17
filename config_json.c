@@ -52,6 +52,22 @@ int config_get_experiments_number()
     return json_array_get_length (experiments);
 }
 
+const char *config_get_experiment_name(int id)
+{
+    g_assert (experiments);
+    
+    JsonObject *obj = json_array_get_object_element(experiments, id);
+    g_assert (obj);
+    return json_object_get_string_member(obj, "name");
+}
+
+const char *config_get_result_fname(const char *test_name)
+{
+    g_assert (result_fnames);
+    
+    return json_object_get_string_member(result_fnames, test_name);
+}
+
 int config_experiment(int experiment_num)
 {
     

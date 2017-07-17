@@ -1,11 +1,12 @@
 #include <stdlib.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <linux/perf_event.h>
 #include <asm/unistd.h>
+
+#include "results_generator.h"
 
 #define uarch_broadwell 0
 #define uarch_haswell 1
@@ -48,12 +49,6 @@ enum {
 #undef PERF_EVENT_CONFIG
     PERF_MON_RAW_MAX,
 };
-
-typedef struct perf_count_val_s {
-    uint64_t value;
-    uint64_t t_enabled;
-    uint64_t t_used;
-} perf_count_val_t;
 
 typedef struct perf_mon_evdesc_s {
     const char *symbol;
@@ -310,7 +305,9 @@ void perf_mon_read()
         printf("%-30s = %-15lu [ %-15lu / %-15lu used / enabled]\n",
                experiment.used_events[i]->symbol,
                counts[i].value, counts[i].t_used, counts[i].t_enabled);
+        
     }
+    results_performance_counters(counts, experiment.n_events);
 }
 
 void perf_mon_close()

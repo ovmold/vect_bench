@@ -8,6 +8,7 @@
 
 #include "config_json.h"
 #include "perf_monitor.h"
+#include "results_generator.h"
 #include "matmul.h"
 
 #ifndef N
@@ -24,7 +25,7 @@ int check_results(int);
 #warning "Check is used."
 #define CHECK(id) check_results(id)
 #else
-#define CHECK(id)
+#define CHECK(id) 1
 #endif
 
 #define DATA_TYPE double
@@ -228,12 +229,13 @@ void test_run(int id)
            matmul_test_names[id],
            rep,
            n_experiments);
-
+    results_generator_begin();
     for (int i = 0; i < n_experiments; i++ ) {
         config_experiment(i);
+        results_begin_experiment(i);
         perf_mon_open();
         for (int j = 0; j < rep; j++ ) {
-
+            results_begin_result(j);
             tsc_val_b = tsc_val_e = 0;
 
             sched_yield();
@@ -247,11 +249,14 @@ void test_run(int id)
             t = omp_get_wtime() - t;
             printf("Execution time of matmul2d: %lf [%lu]\n",
                    t, tsc_val_e - tsc_val_b);
-            CHECK(id);
+            int status = CHECK(id);
+            results_end_result(j, t, tsc_val_e - tsc_val_b, status);
             memset(A, 0, sizeof(DATA_TYPE) * N * N);
         }
+        results_end_experiment(i);
         perf_mon_close();
     }
+    results_generator_end(matmul_test_names[id]);
 }
 
 int check_results(int id)
@@ -262,11 +267,11 @@ int check_results(int id)
                 fprintf(stderr, "A[%d][%d] is not correct\n", i, j);
                 fprintf(stderr, "A[%d][%d] (%.20lf) != (%.20lf)\n",
                         i, j, A[i][j], correct_instance[i][j]);
-                return 1;
+                return 0;
             }
         }
     }
 
     printf("Results are correct\n");
-    return 0;
+    return 1;
 }
