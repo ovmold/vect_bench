@@ -49,18 +49,24 @@ enum {
     PERF_MON_RAW_MAX,
 };
 
-typedef struct perf_result_s {
+typedef struct perf_count_val_s {
     uint64_t value;
     uint64_t t_enabled;
     uint64_t t_used;
-} perf_result_t;
+} perf_count_val_t;
 
 typedef struct perf_mon_evdesc_s {
     const char *symbol;
     uint32_t type;
     uint64_t config;
-    int fd;
 } perf_mon_evdesc_t;
+
+typedef struct perf_mon_experiment_s {
+    int n_events;
+    int *fd;   
+    perf_mon_evdesc_t **used_events;
+    perf_count_val_t *counters;
+} perf_mon_experiment_t;
 
 perf_mon_evdesc_t perf_mon_events [PERF_MON_EVENT_MAX] = {
     [PERF_MON_INSTRUCTIONS] =
@@ -194,6 +200,7 @@ perf_mon_evdesc_t perf_mon_raw_events [PERF_MON_RAW_MAX] = {
 #undef PERF_EVENT_CONFIG
 };
 
+static perf_mon_experiment_t experiment;
 
 static long perf_event_open(struct perf_event_attr *hw_event, pid_t pid,
                             int cpu, int group_fd, unsigned long flags)
@@ -205,44 +212,65 @@ static long perf_event_open(struct perf_event_attr *hw_event, pid_t pid,
     return ret;
 }
 
-int perf_mon_open()
+static perf_mon_evdesc_t *lookup_evdesc(const char *ev_name)
 {
-    struct perf_event_attr pe;
-
-    for(int i = 0; i < PERF_MON_RAW_MAX; i++) {
-        printf("Open = [%s]\n", perf_mon_raw_events[i].symbol);
-        memset(&pe, 0, sizeof(struct perf_event_attr));
-        pe.type = perf_mon_raw_events[i].type;
-        pe.size = sizeof(struct perf_event_attr);
-        pe.config = perf_mon_raw_events[i].config;
-        pe.read_format = PERF_FORMAT_TOTAL_TIME_ENABLED |
-            PERF_FORMAT_TOTAL_TIME_RUNNING;
-        pe.disabled = 1;
-        pe.exclude_kernel = 1;
-        pe.exclude_hv = 1;
-
-        perf_mon_raw_events[i].fd = perf_event_open(&pe, 0, -1, -1, 0);
-        if (perf_mon_raw_events[i].fd == -1) {
-            fprintf(stderr, "Error opening leader %llx\n", pe.config);
-            exit(EXIT_FAILURE);
-        }
+    for (int i = 0; i < PERF_MON_RAW_MAX; i++) {
+        if (!strcmp(ev_name, perf_mon_raw_events[i].symbol))
+            return &perf_mon_raw_events[i];
     }
 
+    for (int i = 0; i < PERF_MON_EVENT_MAX; i++) {
+        if (!strcmp(ev_name, perf_mon_events[i].symbol))
+            return &perf_mon_events[i];
+    }
+    return NULL;
+}
 
-    for(int i = 0; i < PERF_MON_EVENT_MAX; i++ ) {
-        printf("Open [%s]\n", perf_mon_events[i].symbol);
+int perf_mon_set_events(int events_num, const char **events)
+{
+    experiment.n_events = events_num;
+    experiment.used_events = malloc(sizeof(perf_mon_evdesc_t *) * events_num);
+    experiment.fd = malloc(sizeof(int) * events_num);
+    experiment.counters = malloc(sizeof(perf_count_val_t) * events_num);
+
+    if (experiment.used_events == NULL || experiment.fd == NULL ||
+        experiment.counters == NULL) {
+        fprintf(stderr, "[%s:%d] malloc error\n", __func__, __LINE__);
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < events_num; i++ ) {
+        if ((experiment.used_events[i] = lookup_evdesc(events[i])) == NULL) {
+            fprintf(stderr, "[%s:%d] Unknown events \"%s\"\n",
+                    __func__, __LINE__, events[i]);
+        }
+    }
+    return 0;
+}
+
+int perf_mon_open()
+{
+    perf_mon_evdesc_t **events = experiment.used_events;
+    int *fds = experiment.fd;
+    struct perf_event_attr pe;
+
+    for (int i = 0; i < experiment.n_events; i++) {
+        if (events[i] == NULL)
+            continue;
+        
+        printf("Open = [%s]\n", events[i]->symbol);
         memset(&pe, 0, sizeof(struct perf_event_attr));
-        pe.type = perf_mon_events[i].type;
+        pe.type = events[i]->type;
         pe.size = sizeof(struct perf_event_attr);
-        pe.config = perf_mon_events[i].config;
+        pe.config = events[i]->config;
         pe.read_format = PERF_FORMAT_TOTAL_TIME_ENABLED |
             PERF_FORMAT_TOTAL_TIME_RUNNING;
         pe.disabled = 1;
         pe.exclude_kernel = 1;
         pe.exclude_hv = 1;
 
-        perf_mon_events[i].fd = perf_event_open(&pe, 0, -1, -1, 0);
-        if (perf_mon_events[i].fd == -1) {
+        fds[i] = perf_event_open(&pe, 0, -1, -1, 0);
+        if (fds[i] == -1) {
             fprintf(stderr, "Error opening leader %llx\n", pe.config);
             exit(EXIT_FAILURE);
         }
@@ -253,67 +281,55 @@ int perf_mon_open()
 
 void perf_mon_enable()
 {
-    for(int i = PERF_MON_EVENT_MAX - 1; i >= 0; i-- ) {
-        ioctl(perf_mon_events[i].fd, PERF_EVENT_IOC_ENABLE, 0);
+    int *fds = experiment.fd;
+    
+    for (int i = 0; i < experiment.n_events; i++) {
+        ioctl(fds[i], PERF_EVENT_IOC_ENABLE, 0);
     }
-    for(int i = PERF_MON_RAW_MAX - 1; i >= 0; i-- ) {
-        ioctl(perf_mon_raw_events[i].fd, PERF_EVENT_IOC_ENABLE, 0);
-    }
-
-    //    for(int i = 0; i < PERF_MON_EVENT_MAX; i++ ) {
-    for(int i = PERF_MON_EVENT_MAX - 1; i >= 0; i-- ) {
-        ioctl(perf_mon_events[i].fd, PERF_EVENT_IOC_RESET, 0);
-    }
-    //    for(int i = 0; i < PERF_MON_EVENT_MAX; i++ ) {
-    for(int i = PERF_MON_RAW_MAX - 1; i >= 0; i-- ) {
-        ioctl(perf_mon_raw_events[i].fd, PERF_EVENT_IOC_RESET, 0);
+    for (int i = 0; i < experiment.n_events; i++) {
+        ioctl(fds[i], PERF_EVENT_IOC_ENABLE, 0);
     }
 }
 
 void perf_mon_disable()
 {
-    for(int i = 0; i < PERF_MON_EVENT_MAX; i++ ) {
-        ioctl(perf_mon_events[i].fd, PERF_EVENT_IOC_DISABLE, 0);
-    }
-
-    for(int i = 0; i < PERF_MON_RAW_MAX; i++ ) {
-        ioctl(perf_mon_raw_events[i].fd, PERF_EVENT_IOC_DISABLE, 0);
+    int *fds = experiment.fd;
+    
+    for (int i = 0; i < experiment.n_events; i++) {
+        ioctl(fds[i], PERF_EVENT_IOC_DISABLE, 0);
     }
 }
 
 void perf_mon_read()
 {
-    perf_result_t count;
-    for(int i = 0; i < PERF_MON_EVENT_MAX; i++ ) {
-        read(perf_mon_events[i].fd, &count, sizeof(perf_result_t));
+    int *fds = experiment.fd;
+    perf_count_val_t *counts = experiment.counters;
+
+    for (int i = 0; i < experiment.n_events; i++) {
+        read(fds[i], &counts[i], sizeof(perf_count_val_t));
         printf("%-30s = %-15lu [ %-15lu / %-15lu used / enabled]\n",
-               perf_mon_events[i].symbol,
-               count.value, count.t_used, count.t_enabled);
-        memset(&count, 0, sizeof(perf_result_t));
-    }
-    
-    for(int i = 0; i < PERF_MON_RAW_MAX; i++ ) {
-        read(perf_mon_raw_events[i].fd, &count, sizeof(perf_result_t));
-        printf("%-30s = %-15lu [ %-15lu / %-15lu used / enabled]\n",
-               perf_mon_raw_events[i].symbol,
-               count.value, count.t_used, count.t_enabled);
-        memset(&count, 0, sizeof(perf_result_t));
+               experiment.used_events[i]->symbol,
+               counts[i].value, counts[i].t_used, counts[i].t_enabled);
     }
 }
 
 void perf_mon_close()
 {
-   for(int i = 0; i < PERF_MON_EVENT_MAX; i++ ) {
-       //        printf("Close [%s]\n", perf_mon_events[i].symbol);
-        close(perf_mon_events[i].fd);
-        perf_mon_events[i].fd = -1;
+    int *fds = experiment.fd;
+    
+    for (int i = 0; i < experiment.n_events; i++) {
+        close(fds[i]);
+        fds[i] = -1;
     }
-   for(int i = 0; i < PERF_MON_RAW_MAX; i++ ) {
-       //        printf("Close [%s]\n", perf_mon_events[i].symbol);
-        close(perf_mon_raw_events[i].fd);
-        perf_mon_raw_events[i].fd = -1;
-    }
+   
+    free(experiment.used_events);
+    free(experiment.fd);
+    free(experiment.counters);
 
+    experiment.used_events = NULL;
+    experiment.fd = NULL;
+    experiment.counters = NULL;
+    experiment.n_events = 0;
 }
 
 void perf_mon_empty_test()

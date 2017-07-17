@@ -217,32 +217,40 @@ void test_run(int id)
         fprintf(stderr, "%d is unknown test\n", id);
         return ;
     }
-
-    long int rep = config_get_repeats();
-    printf("Test [%s] <%s> will run %ld times\n",
-           matmul2d_descs[id].desc,
-           matmul_test_names[id],
-           rep);
-
+    
     init_data(id);
     matmul2d_descs[id].make_sample();
 
-    for (int i = 0; i < rep; i++ ) {
-        tsc_val_b = tsc_val_e = 0;
+    int n_experiments = config_get_experiments_number();
+    long int rep = config_get_repeats();
+    printf("Test [%s] <%s> will run %ld (* %d experiments) times\n",
+           matmul2d_descs[id].desc,
+           matmul_test_names[id],
+           rep,
+           n_experiments);
 
-        sched_yield();
-        double t = omp_get_wtime();
+    for (int i = 0; i < n_experiments; i++ ) {
+        config_experiment(i);
+        perf_mon_open();
+        for (int j = 0; j < rep; j++ ) {
 
-        PERF_MON_ENABLE();
-        matmul2d_descs[id].tst_entry(A, B, C);
-        PERF_MON_DISABLE();
-        PERF_MON_READ();
+            tsc_val_b = tsc_val_e = 0;
 
-        t = omp_get_wtime() - t;
-        printf("Execution time of matmul2d: %lf [%lu]\n",
-               t, tsc_val_e - tsc_val_b);
-        CHECK(id);
-        memset(A, 0, sizeof(DATA_TYPE) * N * N);
+            sched_yield();
+            double t = omp_get_wtime();
+
+            perf_mon_enable();
+            matmul2d_descs[id].tst_entry(A, B, C);
+            perf_mon_disable();
+            perf_mon_read();
+
+            t = omp_get_wtime() - t;
+            printf("Execution time of matmul2d: %lf [%lu]\n",
+                   t, tsc_val_e - tsc_val_b);
+            CHECK(id);
+            memset(A, 0, sizeof(DATA_TYPE) * N * N);
+        }
+        perf_mon_close();
     }
 }
 

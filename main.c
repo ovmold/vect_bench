@@ -12,19 +12,13 @@ const char *matmul_config = "experiments-config.json";
 int main(int argc, char* argv[])
 {
     g_test_init (&argc, &argv, NULL);
-
     config_tests(matmul_config);
-
     prepare_system("1", "23", "1");
-    
-    PERF_MON_OPEN();
     
     for (int i = 0; i < matmul2d_number_items; i++) {
         test_run(i);
     }
     
-    PERF_MON_CLOSE();
-
     config_finalize();
     
     return 0;
