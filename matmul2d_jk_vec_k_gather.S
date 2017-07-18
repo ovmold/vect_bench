@@ -30,8 +30,9 @@ matmul2d_jk_vec_k_gather:
     leaq    -MTRX_SIZE(%rcx), %rax
     movq    %r8, %rdx
 .L3: /* k loop */
-    vmovupd (%rdx), %xmm0                       /* load B[i][k + 0:k + 1] */
-    vinsertf128 $0x1, 16(%rdx), %ymm0, %ymm0    /* load B[i][k + 2:k + 4] */
+    /*IACA_START_MARKER*/
+    vmovupd (%rdx), %ymm0                       /* load B[i][k + 0:k + 1] */
+    /*vinsertf128 $0x1, 16(%rdx), %ymm0, %ymm0    load B[i][k + 2:k + 4] */
     vpcmpeqw %ymm3, %ymm3, %ymm3                /* set mask (ymm1) to 1 1 1 1 */
     vgatherdpd %ymm3, (%rax, %xmm2), %ymm4      /* load C[k + 0:k + 4][j] */
     addq    $STR_SIZE*4, %rax                   /* k+=4 or C = C += STR_SIZE*4 (offset by column) */
