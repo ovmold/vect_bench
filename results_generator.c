@@ -65,10 +65,10 @@ int results_performance_counters(const perf_count_val_t *counts, int counts_num)
     return 0;
 }
 
-int results_end_result(int id, int t, long unsigned int tsc, int status)
+int results_end_result(int id, double t, long unsigned int tsc, int status)
 {
     json_builder_set_member_name (builder, "time");
-    json_builder_add_int_value (builder, t);
+    json_builder_add_double_value (builder, t);
 
     json_builder_set_member_name (builder, "tsc_val");
     json_builder_add_int_value (builder, tsc);
