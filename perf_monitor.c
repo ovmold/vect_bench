@@ -13,11 +13,15 @@
 #define uarch_ivy_bridge 2
 
 enum {
+    PERF_MON_CYCLES,
     PERF_MON_INSTRUCTIONS,
-    PEF_MON_L1_DCACHE_LOAD_MISSES,
+    PERF_MON_BRANCH_INSTRUCTIONS,
+    PERF_MON_BRANCH_MISSES,
+    PERF_MON_L1_DCACHE_LOAD_MISSES,
     PERF_MON_L1_DCACHE_LOADS,
     PERF_MON_L1_DCACHE_STORE_MISSES,
     PERF_MON_L1_DCACHE_STORES,
+    PERF_MON_LLC_LOADS_MISSES,    
     PERF_MON_LLC_LOADS,
     PERF_MON_LLC_STORES,
     PERF_MON_DTLB_LOAD_MISSES,
@@ -64,14 +68,34 @@ typedef struct perf_mon_experiment_s {
 } perf_mon_experiment_t;
 
 perf_mon_evdesc_t perf_mon_events [PERF_MON_EVENT_MAX] = {
+    [PERF_MON_CYCLES] =
+    {
+        .symbol = "cycles",
+        .type = PERF_TYPE_HARDWARE,
+        .config = PERF_COUNT_HW_CPU_CYCLES,
+    },
     [PERF_MON_INSTRUCTIONS] =
     {
         .symbol = "instructions",
         .type = PERF_TYPE_HARDWARE,
-        .config = PERF_COUNT_HW_CPU_CYCLES,
+        .config = PERF_COUNT_HW_INSTRUCTIONS,
+    },
+
+    [PERF_MON_BRANCH_INSTRUCTIONS] =
+    {
+        .symbol = "branch-instructions",
+        .type = PERF_TYPE_HARDWARE,
+        .config = PERF_COUNT_HW_BRANCH_INSTRUCTIONS,
     },
     
-    [PEF_MON_L1_DCACHE_LOAD_MISSES] =
+    [PERF_MON_BRANCH_MISSES] =
+    {
+        .symbol = "branch-misses",
+        .type = PERF_TYPE_HARDWARE,
+        .config = PERF_COUNT_HW_BRANCH_MISSES,
+    },
+    
+    [PERF_MON_L1_DCACHE_LOAD_MISSES] =
     {
         .symbol = "L1-dcache-load-misses",
         .type = PERF_TYPE_HW_CACHE,
@@ -111,6 +135,16 @@ perf_mon_evdesc_t perf_mon_events [PERF_MON_EVENT_MAX] = {
         (PERF_COUNT_HW_CACHE_RESULT_ACCESS	<< 16),
     },
     
+    [PERF_MON_LLC_LOADS_MISSES] =
+    {
+        .symbol = "LLC-load-misses",
+        .type = PERF_TYPE_HW_CACHE,
+        .config =
+        PERF_COUNT_HW_CACHE_LL		<<  0  |
+        (PERF_COUNT_HW_CACHE_OP_READ		<<  8) |
+        (PERF_COUNT_HW_CACHE_RESULT_MISS	<< 16),
+    },
+
     [PERF_MON_LLC_LOADS] =
     {
         .symbol = "LLC-loads",

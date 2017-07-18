@@ -38,3 +38,11 @@ PERF_EVENT_CONFIG(PERF_MON_UOPS_DISPATCHED_PORT7,
                   "uops_dispatched_port.port_7",
                   PERF_TYPE_RAW,
                   0x80 << 8 | 0xa1)
+PERF_EVENT_CONFIG(PERF_MON_MEM_UOPS_RETIRED_ALL_LOADS,
+                  "mem_uops_retired.all_loads",
+                  PERF_TYPE_RAW,
+                  0x81 << 8 | 0xd0)
+PERF_EVENT_CONFIG(PERF_MON_MEM_UOPS_RETIRED_ALL_STORES,
+                  "mem_uops_retired.all_stores",
+                  PERF_TYPE_RAW,
+                  0x82 << 8 | 0xd0)
