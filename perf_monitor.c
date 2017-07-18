@@ -282,7 +282,7 @@ void perf_mon_enable()
         ioctl(fds[i], PERF_EVENT_IOC_ENABLE, 0);
     }
     for (int i = 0; i < experiment.n_events; i++) {
-        ioctl(fds[i], PERF_EVENT_IOC_ENABLE, 0);
+        ioctl(fds[i], PERF_EVENT_IOC_RESET, 0);
     }
 }
 
