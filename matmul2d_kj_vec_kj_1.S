@@ -20,7 +20,7 @@ matmul2d_kj_vec_kj_1:
     leaq    MTRX_SIZE(%rdi), %r8                    /* A[N - 1][N - 1] */
     leaq    STR_SIZE(%rsi), %r10                     /* B[i + 1][0] */
     vmovdqu (vindices), %xmm4 
-
+    push %rbx
 .L2: /* i loop */
     movq    %rdx, %rdi                                 /* C[0][0] */
     leaq    -STR_SIZE(%r10), %rsi                    /* B[i - 1][k] */
@@ -30,6 +30,7 @@ matmul2d_kj_vec_kj_1:
     xorl    %eax, %eax                                /* j = 0 */
 
 .L5: /* j loop */
+    
     xorl    %ebx, %ebx                                /* counter = 0 */
 
 .L7:
@@ -69,5 +70,7 @@ matmul2d_kj_vec_kj_1:
     vzeroupper
 
     get_tsc tsc_val_e
-
+    
+    pop %rbx
+    
     ret
