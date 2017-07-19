@@ -1,0 +1,48 @@
+/*
+
+    PERF_EVENT_CONFIG(enum_name,
+                      "symbol",
+                      PERF_TYPE_RAW,
+                      config = unit_mask << 8 | event )
+*/
+
+PERF_EVENT_CONFIG(PERF_MON_UOPS_DISPATCHED_PORT0,
+                  "uops_dispatched_port.port_0",
+                  PERF_TYPE_RAW,
+                  0x01 << 8 | 0xa1)
+PERF_EVENT_CONFIG(PERF_MON_UOPS_DISPATCHED_PORT1,
+                  "uops_dispatched_port.port_1",
+                  PERF_TYPE_RAW,
+                  0x02 << 8 | 0xa1)
+PERF_EVENT_CONFIG(PERF_MON_UOPS_DISPATCHED_PORT2,
+                  "uops_dispatched_port.port_2",
+                  PERF_TYPE_RAW,
+                  0x04 << 8 | 0xa1)
+PERF_EVENT_CONFIG(PERF_MON_UOPS_DISPATCHED_PORT3,
+                  "uops_dispatched_port.port_3",
+                  PERF_TYPE_RAW,
+                  0x08 << 8 | 0xa1)
+PERF_EVENT_CONFIG(PERF_MON_UOPS_DISPATCHED_PORT4,
+                  "uops_dispatched_port.port_4",
+                  PERF_TYPE_RAW,
+                  0x10 << 8 | 0xa1)
+PERF_EVENT_CONFIG(PERF_MON_UOPS_DISPATCHED_PORT5,
+                  "uops_dispatched_port.port_5",
+                  PERF_TYPE_RAW,
+                  0x20 << 8 | 0xa1)
+PERF_EVENT_CONFIG(PERF_MON_UOPS_DISPATCHED_PORT6,
+                  "uops_dispatched_port.port_6",
+                  PERF_TYPE_RAW,
+                  0x40 << 8 | 0xa1)
+PERF_EVENT_CONFIG(PERF_MON_UOPS_DISPATCHED_PORT7,
+                  "uops_dispatched_port.port_7",
+                  PERF_TYPE_RAW,
+                  0x80 << 8 | 0xa1)
+PERF_EVENT_CONFIG(PERF_MON_MEM_UOPS_RETIRED_ALL_LOADS,
+                  "mem_uops_retired.all_loads",
+                  PERF_TYPE_RAW,
+                  0x81 << 8 | 0xd0)
+PERF_EVENT_CONFIG(PERF_MON_MEM_UOPS_RETIRED_ALL_STORES,
+                  "mem_uops_retired.all_stores",
+                  PERF_TYPE_RAW,
+                  0x82 << 8 | 0xd0)

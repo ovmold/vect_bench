@@ -14,12 +14,12 @@ matmul2d_jk_vec_k_no_gather:
     movq    %r10, %rcx
     movq    %r9, %rsi
 .L6: /* j loop */
-//    vxorpd %ymm1, %ymm1, %ymm1
+    /* vxorpd %ymm1, %ymm1, %ymm1 */
     vmovsd (%rsi), %xmm1                   /* load A[i][j] */
     leaq    -MTRX_SIZE(%rcx), %rax
     movq    %r8, %rdx
 .L3: /* k loop */
-    //IACA_START_MARKER
+    /*IACA_START_MARKER*/
     vmovupd (%rdx), %ymm0                       /* load B[i][k + 0:k + 1] */
     /*vinsertf128 $0x1, 16(%rdx), %ymm0, %ymm0     load B[i][k + 2:k + 4] */
     vmovq (%rax), %xmm2

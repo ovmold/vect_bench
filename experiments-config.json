@@ -1,0 +1,45 @@
+{
+    "result_fnames" : {
+        "matmul2d_jk_novec" : "jk_novec.json",
+        "matmul2d_kj_novec" : "kj_novec.json",
+        "matmul2d_kj_vec_k" : "kj_vec_k.json",
+        "matmul2d_kj_vec_k_no_gather" :
+        "kj_vec_k_no_gather.json",
+        "matmul2d_kj_vec_j" : "kj_vec_j.json",
+        "matmul2d_kj_vec_kj_1" : "kj_vec_kj_1.json",
+        "matmul2d_kj_vec_kj_1_no_gather" :
+        "kj_vec_kj_1_no_gather.json",
+        "matmul2d_kj_vec_kj_2" : "kj_vec_kj_2.json",
+        "matmul2d_jk_vec_k_gather" : "jk_vec_k_gather.json",
+        "matmul2d_jk_vec_k_no_gather" :
+        "jk_vec_k_no_gather.json",
+        "matmul2d_jk_vec_j" : "jk_vec_j.json",
+        "matmul2d_jk_vec_jk_bcast" : "jk_vec_jk_bcast.json",
+        "matmul2d_jk_vec_jk_strided_1" :
+        "jk_vec_jk_strided_1.json",
+        "matmul2d_jk_vec_jk_strided_2" :
+        "jk_vec_jk_strided_2.json"
+    },
+    
+    "repeat" : 11,
+    "experiments" : [
+        {
+            "name" : "experiment1",
+            "perf_events" : [
+                "uops_dispatched_port.port_0",
+                "uops_dispatched_port.port_1",
+                "uops_dispatched_port.port_2",
+                "uops_dispatched_port.port_3"
+            ]
+        },
+        {
+            "name" : "experiment2",
+            "perf_events" : [
+                "uops_dispatched_port.port_2",
+                "uops_dispatched_port.port_3",
+                "uops_dispatched_port.port_4",
+                "uops_dispatched_port.port_5"
+            ]
+        }
+    ]
+}
